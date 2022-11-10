@@ -20,11 +20,11 @@ Describe 'Get-ChilditemEnhanced' -Tag Integration {
    Context 'Test additional parameters' -Tag Integration {
       BeforeAll {
          # create directory structure
-         $F1 = New-Item -Path "$TestDrive\Folder1" -Name 'Werver' -ItemType Directory -Force
-         $F11_S1 = New-Item -Path "$TestDrive\Folder1\Folder11" -Name 'F11_SF1' -ItemType Directory -Force
-         $F11_S2 = New-Item -Path "$TestDrive\Folder1\Folder11" -Name 'F11_SF2' -ItemType Directory -Force
-         $F2_S1 = New-Item -Path "$TestDrive\Folder2" -Name 'F2_SF1' -ItemType Directory -Force
-         $F2_S2 = New-Item -Path "$TestDrive\Folder2" -Name 'F2_SF2' -ItemType Directory -Force
+         $null = New-Item -Path "$TestDrive\Folder1" -Name 'Werver' -ItemType Directory -Force
+         $null = New-Item -Path "$TestDrive\Folder1\Folder11" -Name 'F11_SF1' -ItemType Directory -Force
+         $null = New-Item -Path "$TestDrive\Folder1\Folder11" -Name 'F11_SF2' -ItemType Directory -Force
+         $null = New-Item -Path "$TestDrive\Folder2" -Name 'F2_SF1' -ItemType Directory -Force
+         $null = New-Item -Path "$TestDrive\Folder2" -Name 'F2_SF2' -ItemType Directory -Force
       }
       It 'Should automatically add recurse, when -StartDepth given' -Tag Unit {
          $Result = Get-ChildItemEnhanced -Path $TestDrive -StartDepth 2

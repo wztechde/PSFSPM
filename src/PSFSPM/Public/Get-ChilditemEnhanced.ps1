@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-   Get-ChilditemEnhanced is am emhanced version of Get-Childitem
+   Get-ChilditemEnhanced is am enhanced version of Get-Childitem
 .DESCRIPTION
    Get-ChilditemEnhanced adds an additional parameter -StartDepth
 .PARAMETER Attributes
@@ -121,7 +121,9 @@ Function Get-ChildItemEnhanced {
             }
             $GivenDepth = ($Path.Split('\')).Count - 1
             $TargetDepth = $GivenDepth + $StartDepth
-            $scriptCmd = { & $wrappedCmd @PSBoundParameters | Where-Object { ($_.fullname.Split('\')).Count - 1 -eq $TargetDepth } }
+            $scriptCmd = { & $wrappedCmd @PSBoundParameters | Where-Object { ($_.fullname.Split('\')).Count - 1 -eq $TargetDepth }}
+            #TODO: Find a way to add members to filtered output
+            #$scriptCmd = { $scriptCmd | Add-Member -MemberType NoteProperty -name "Wolle" -Value "Wolle" }
          }
          else {
             $scriptCmd = { & $wrappedCmd @PSBoundParameters }
@@ -139,6 +141,7 @@ Function Get-ChildItemEnhanced {
 
 
       try {
+         #Write-Host "Fischer"
          $steppablePipeline.Process($_)
       }
       catch {
