@@ -26,7 +26,7 @@ Describe 'Set-Permission' -Tag Unit {
    }#end context function call
    Context 'Parameter check - path' -Tag Unit {
       It 'Should prompt, if path is missing and error when pass is empty' {
-         { Set-Permission -Path "" -PermissionObject $PermObject } | Should -Throw "* Cannot bind argument to parameter 'Path'*"
+         { Set-Permission -Path "" -PermissionObject $PermObject } | Should -Throw "Cannot validate argument on parameter*"
       }
       It 'Should return error, when param is no filesystemobject' {
          { Set-Permission -Path 'Throw' } | Should -Throw "Cannot validate argument on parameter 'Path'*"
