@@ -101,4 +101,42 @@ Describe 'Class-Tests' -Tag Unit {
          $result.Permission.Inheritance | Should -Be ("ThisFolderFiles", "ThisFolderOnly")
       }
    }#end context
+   Context "Class FMPathPermission - method GFSAR" -Tag Unit {
+      BeforeAll {
+         $FMPP1 = New-FMPathPermission -Path C:\Temp -Identity foo -Permission Write -Inheritance ThisFolderFiles
+         $FMPP2 = New-FMPathPermission -Path C:\Temp -Identity bar -Permission Read -Inheritance ThisFolderOnly
+         $FMPP3 = New-FMPathPermission -Path C:\Temp -Identity foo, bar -Permission Write, Read -Inheritance ThisFolderFiles, OnlySubfolders
+      }
+      It "checks, that method is accessible" {
+         {$FMPP1.GetFileSystemAccessRule() } | Should -Not -Throw
+      }
+      It "checks for correct object being returned FMPP1" {
+         $result = $FMPP1.GetFileSystemAccessRule()
+         $result.count | Should -Be 1
+         $result.FileSystemRights | Should -Be "Write, Synchronize"
+         $result.IdentityReference | Should -Be "foo"
+         $result.InheritanceFlags | Should -Be "ObjectInherit"
+         $result.PropagationFlags | Should -Be "None"
+      }
+      It "checks for correct object being returned FMPP2" {
+         $result = $FMPP2.GetFileSystemAccessRule()
+         $result.count | Should -Be 1
+         $result.FileSystemRights | Should -Be "Read, Synchronize"
+         $result.IdentityReference | Should -Be "bar"
+         $result.InheritanceFlags | Should -Be "None"
+         $result.PropagationFlags | Should -Be "None"
+      }
+      It "checks for correct object being returned FMPP3 (2 Permissions on path)" {
+         $result = $FMPP3.GetFileSystemAccessRule()
+         $result.Count | Should -Be 2
+         $result[0].FileSystemRights | Should -Be "Write, Synchronize"
+         $result[0].IdentityReference | Should -Be "foo"
+         $result[0].InheritanceFlags | Should -Be "ObjectInherit"
+         $result[0].PropagationFlags | Should -Be "None"
+         $result[1].FileSystemRights | Should -Be "Read, Synchronize"
+         $result[1].IdentityReference | Should -Be "bar"
+         $result[1].InheritanceFlags | Should -Be "ContainerInherit"
+         $result[1].PropagationFlags | Should -Be "InheritOnly"
+      }
+   }#end context
 }

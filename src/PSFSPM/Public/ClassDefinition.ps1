@@ -78,6 +78,33 @@ Class FMPathPermission {
       $this.Path = $Path
       $this.Permission = $Permission
    }
+
+   # methods
+   [System.Security.AccessControl.FileSystemAccessRule[]]GetFileSystemAccessRule () {
+      $Output = @()
+      <#
+      if ($this.Permission.Count -eq 1) {
+         $TempPermission = $this.Permission.Identity,
+         $this.Permission.permission,
+         $this.Permission.GetInheritance().Inherit,
+         $this.Permission.GetInheritance().Propagate,
+         [System.Security.AccessControl.AccessControlType]::Allow
+         $Output += New-Object System.Security.AccessControl.FileSystemAccessRule $TempPermission
+      }
+      else {
+         #>
+      # more than 1 permission - use loop
+      for ($i = 0 ; $i -lt $this.Permission.count; $i++) {
+         $TempPermission = $this.Permission[$i].Identity,
+         $this.Permission[$i].permission,
+         $this.Permission[$i].GetInheritance().Inherit,
+         $this.Permission[$i].GetInheritance().Propagate,
+         [System.Security.AccessControl.AccessControlType]::Allow
+         $Output += New-Object System.Security.AccessControl.FileSystemAccessRule $TempPermission
+      }
+      #      }
+      return $Output
+   }
 }
 
 #helper function to call constructor
@@ -105,16 +132,18 @@ Function New-FMPathPermission {
       If (($Identity.Count -ne $Permission.Count) -or ($Identity.Count -ne $Inheritance.Count)) {
          Throw "Counts of identities, permissions and inheritances don't match - please check"
       }
+      <#
       if ($Identity.Count -eq 1) {
          $InputObject = New-FMPermission -Identity $Identity -Permission $Permission -Inheritance $Inheritance
       }
       else {
-         #create permission array
-         $InputObject=@()
-         for ($i = 0; $i -lt $Identity.count; $i++) {
-            $InputObject += New-FMPermission -Identity $Identity[$i] -Permission $Permission[$i] -Inheritance $Inheritance[$i]
-         }
+         #>
+      #create permission array
+      $InputObject = @()
+      for ($i = 0; $i -lt $Identity.count; $i++) {
+         $InputObject += New-FMPermission -Identity $Identity[$i] -Permission $Permission[$i] -Inheritance $Inheritance[$i]
       }
+      #}
       [FMPathPermission]::New($Path, $InputObject)
    }
 }
