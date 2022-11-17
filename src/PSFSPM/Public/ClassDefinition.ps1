@@ -49,7 +49,8 @@ Class FMPermission {
       }
       return $IMInheritanceConversionTable[$this.Inheritance]
    }
-}
+}#end class
+
 # helper function to call constructor
 Function New-FMPermission {
    Param(
@@ -58,7 +59,7 @@ Function New-FMPermission {
       [IMInheritance]$Inheritance
    )
    [FMPermission]::New($Identity, $Permission, $Inheritance)
-}
+}#end function
 
 Class FMPathPermission {
    [String[]]$Path
@@ -105,7 +106,7 @@ Class FMPathPermission {
       #      }
       return $Output
    }
-}
+}#end class
 
 #helper function to call constructor
 Function New-FMPathPermission {
@@ -145,5 +146,58 @@ Function New-FMPathPermission {
       }
       #}
       [FMPathPermission]::New($Path, $InputObject)
+   }#end if
+}#end function
+
+Class FMDirectory {
+   [FMPathPermission]$Root
+   [FMPathPermission[]]$Child
+
+   FMDirectory(
+      [FMPathPermission]$Root,
+      [FMPathPermission[]]$Child
+   ) {
+      $this.Root = $Root
+      $this.Root.ACRule.isProtected = $false
+      # preserve inheritance must not be changed to keep the inherited acls
+      if ($($child.path) -match "^\w:\\") {
+         Throw "FMDirectory - children must not contain drive information"
+      }
+      $this.Child = $Child
    }
+
+   [String]GetChildFullname(
+      [int]$index
+   ) {
+      #INFO concatenates only string1 - there might be an issue with path(s) not existing
+      return ("$($this.Root.Path)\$($this.Child[$index].path)")
+   }
+}
+
+<#
+.SYNOPSIS
+   New-FMDirectory creates a FMDirectory from the given root and child objects
+.DESCRIPTION
+   New-FMDirectory takes a root FMPathPermission and one or more child FMPathPermission(s). It guarantees, that all inherited permissions will be inherited down the root
+   path and NOT being changed to explicit permissions.
+   The children instead WILL break inheritance, change all inherited permssions to explicit ones.
+   This all is metaphorical for the function itself does not permission handling but
+   only keeps the information in the described way.
+.PARAMETER Root
+   A FMPathPermission object defining the root element for an explicit permission structure
+.PARAMETER Child
+   One or more FMPathPermission object to define subfolders of the root element, where different
+   permission are to be set. Only folder names for the path element of the FMPathPermission are allowed here
+.NOTES
+   Information or caveats about the function e.g. 'This function is not supported in Linux'
+.EXAMPLE
+   New-FMDirectory -Root $Root -Child $Child1,$Child2
+   Get's the root and two children
+#>
+Function New-FMDirectory {
+   Param (
+      [FMPathPermission]$Root,
+      [FMPathPermission[]]$Child
+   )
+   [FMDirectory]::New($Root, $Child)
 }

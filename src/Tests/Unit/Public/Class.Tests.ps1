@@ -62,13 +62,13 @@ Describe 'Class-Tests' -Tag Unit {
    }#end context
    Context 'Class FMPathPermission - helper function - paramset [Default]' -Tag Unit {
       It "verify that helper funtion parameterset 'default' exists" {
-         {New-FMPathPermission -Path C:\Temp -Identity 'foo' -Permission 'Write' -Inheritance 'ThisFolderOnly'}  | Should -Not -Throw
+         { New-FMPathPermission -Path C:\Temp -Identity 'foo' -Permission 'Write' -Inheritance 'ThisFolderOnly' }  | Should -Not -Throw
       }
       It 'checks for correct object being returned' {
          (New-FMPathPermission -Path C:\Temp -Identity 'foo' -Permission 'Write' -Inheritance 'ThisFolderOnly').Gettype() | Should -Be 'FMPathPermission'
       }
       It 'checks for correct object being returned - one path' {
-         $Result=New-FMPathPermission -Path C:\Temp -Identity 'foo' -Permission 'Write' -Inheritance 'ThisFolderOnly'
+         $Result = New-FMPathPermission -Path C:\Temp -Identity 'foo' -Permission 'Write' -Inheritance 'ThisFolderOnly'
          $result.Path | Should -Be 'C:\Temp'
          $result.Permission.Count | Should -be 1
          $result.Permission.Identity | Should -Be "foo"
@@ -76,25 +76,25 @@ Describe 'Class-Tests' -Tag Unit {
          $result.Permission.Inheritance | Should -Be "ThisFolderOnly"
       }
       It 'checks for correct object being returned - two path' {
-         $Result=New-FMPathPermission -Path C:\Temp,D:\Temp -Identity foo -Permission Write -Inheritance ThisFolderOnly
-         $result.Path | Should -Be ('C:\Temp','D:\Temp')
+         $Result = New-FMPathPermission -Path C:\Temp, D:\Temp -Identity foo -Permission Write -Inheritance ThisFolderOnly
+         $result.Path | Should -Be ('C:\Temp', 'D:\Temp')
          $result.Permission.Count | Should -be 1
          $result.Permission.Identity | Should -Be "foo"
          $result.Permission.Permission | Should -Be "Write"
          $result.Permission.Inheritance | Should -Be "ThisFolderOnly"
       }
       It "Should fail if parameter counts don't match" {
-{New-FMPathPermission -Path C:\Temp,D:\Temp -Identity foo -Permission Write,Read -Inheritance ThisFolderOnly} | Should -Throw "Counts of identities*"
+         { New-FMPathPermission -Path C:\Temp, D:\Temp -Identity foo -Permission Write, Read -Inheritance ThisFolderOnly } | Should -Throw "Counts of identities*"
       }
       It "checks for correct object being returned - two permissions" {
-         $Result=New-FMPathPermission -Path C:\Temp -Identity foo,bar -Permission Write,Read -Inheritance ThisFolderFiles,ThisFolderOnly
+         $Result = New-FMPathPermission -Path C:\Temp -Identity foo, bar -Permission Write, Read -Inheritance ThisFolderFiles, ThisFolderOnly
          $Result.Permission.Count | Should -be 2
          $result.Permission.Identity | Should -Be ('foo', 'bar')
          $result.Permission.Permission | Should -Be ('Write', 'Read')
          $result.Permission.Inheritance | Should -Be ("ThisFolderFiles", "ThisFolderOnly")
       }
       It "checks for correct object being returned - two permissions, two paths" {
-         $Result=New-FMPathPermission -Path C:\Temp,D:\Temp -Identity foo,bar -Permission Write,Read -Inheritance ThisFolderFiles,ThisFolderOnly
+         $Result = New-FMPathPermission -Path C:\Temp, D:\Temp -Identity foo, bar -Permission Write, Read -Inheritance ThisFolderFiles, ThisFolderOnly
          $Result.Permission.Count | Should -be 2
          $result.Permission.Identity | Should -Be ('foo', 'bar')
          $result.Permission.Permission | Should -Be ('Write', 'Read')
@@ -108,7 +108,7 @@ Describe 'Class-Tests' -Tag Unit {
          $FMPP3 = New-FMPathPermission -Path C:\Temp -Identity foo, bar -Permission Write, Read -Inheritance ThisFolderFiles, OnlySubfolders
       }
       It "checks, that method is accessible" {
-         {$FMPP1.GetFileSystemAccessRule() } | Should -Not -Throw
+         { $FMPP1.GetFileSystemAccessRule() } | Should -Not -Throw
       }
       It "checks for correct object being returned FMPP1" {
          $result = $FMPP1.GetFileSystemAccessRule()
@@ -139,4 +139,38 @@ Describe 'Class-Tests' -Tag Unit {
          $result[1].PropagationFlags | Should -Be "InheritOnly"
       }
    }#end context
+   Context "Class FMDirectory" -Tag Unit {
+      BeforeAll {
+         $Root = New-FMPathPermission -Path C:\Temp -Identity foo -Permission Write -Inheritance ThisFolderFiles
+         $Child1 = New-FMPathPermission -Path Foo -Identity foo -Permission Write -Inheritance ThisFolderFiles
+      }
+      It "checks if helper function exists" {
+         { New-FMDirectory -Root $Root -Child $Child1 } | Should -Not -Throw "*is not recognized"
+      }
+      It "checks for correct obejct being returned" {
+         (New-FMDirectory -Root $Root -Child $Child1).Gettype() | Should -Be 'FMDirectory'
+      }
+      It "verifies that child paths with drive information fail" {
+         $Child = New-FMPathPermission -Path C:\Foo -Identity foo -Permission Write -Inheritance ThisFolderFiles
+         { New-FMDirectory -Root $Root -Child $Child } | Should -Throw "FMDirectory - children must not contain drive information"
+      }
+      It "verifies that child paths with drive information fail - more children" {
+         $Child = New-FMPathPermission -Path Foo -Identity foo -Permission Write -Inheritance ThisFolderFiles
+         $Child2 = New-FMPathPermission -Path C:\Foo -Identity foo -Permission Write -Inheritance ThisFolderFiles
+         { New-FMDirectory -Root $Root -Child $Child, $Child2 } | Should -Throw "FMDirectory - children must not contain drive information"
+      }
+      It "return full child path - check for method existing" {
+         $Child2 = New-FMPathPermission -Path bar -Identity foo -Permission Write -Inheritance ThisFolderFiles
+         $TestDir=New-FMDirectory -Root $Root -Child $Child1, $Child2
+         { $TestDir.GetChildFullname(0) } | Should -Not -Throw "Method invocation fail*"
+      }
+      It "return full child path - check for correct information being returned" {
+         $Child2 = New-FMPathPermission -Path bar -Identity foo -Permission Write -Inheritance ThisFolderFiles
+         $TestDir=New-FMDirectory -Root $Root -Child $Child1, $Child2
+         $result=$TestDir.GetChildFullname(0)
+         $result | Should -Be "C:\Temp\Foo"
+         $result=$TestDir.GetChildFullname(1)
+         $result | Should -Be "C:\Temp\bar"
+      }
+   }
 }
