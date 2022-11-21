@@ -46,14 +46,12 @@ function Set-Permission {
    [CmdletBinding(SupportsShouldProcess)]
    param (
       # Path(s) to set permission(s) on
-      [Parameter(Position = 0, Mandatory, ValueFromPipeline)]
-      [Parameter(ParameterSetName = 'Default')]
-      [Parameter(ParameterSetName = 'PermissionObject')]
-      [Parameter(ParameterSetName = 'PathPermissionObject')]
+      [Parameter(Position = 0, Mandatory, ValueFromPipeline, ParameterSetName = 'Default')]
+      [Parameter(Position = 0, Mandatory, ValueFromPipeline, ParameterSetName = 'PermissionObject')]
       [ValidateScript({
-         if (Test-Path $_) { $true }
-         else { Throw "Path $_ is not valid" }
-      })]
+            if (Test-Path $_) { $true }
+            else { Throw "Path $_ is not valid" }
+         })]
       [String[]]
       $Path,
       # The identity(ies) to set permission for
@@ -62,15 +60,20 @@ function Set-Permission {
       [String[]]$Identity,
       # The permission(s) to set
       [Parameter(ParameterSetName = 'Default')]
-      [String]$Permission,
+      [FileRights[]]$Permission,
       # The inheritance(s) to set
       [Parameter(ParameterSetName = 'Default')]
-      [String]$Inheritance,
+      [IMInheritance[]]$Inheritance,
       # A permission object with all necessary permissions
-      [Parameter(ParameterSetName = 'PermissionObject',DontShow)]
-      [String]$PermissionObject,
-      [Parameter(ParameterSetName = 'PathPermissionObject',DontShow)]
-      [String]$PathPermissionObject
+      [Parameter(ParameterSetName = 'PermissionObject', DontShow)]
+      [FMPermission[]]$PermissionObject,
+      [Parameter(ParameterSetName = 'PathPermissionObject', DontShow)]
+      [FMPathPermission[]]$PathPermissionObject,
+      # primarily for testing purposes
+      [Parameter(ParameterSetName = 'Default')]
+      [Parameter(ParameterSetName = 'PermissionObject')]
+      [Parameter(ParameterSetName = 'PathPermissionObject')]
+      [Switch]$PassThru
    )
 
    begin {
@@ -80,16 +83,37 @@ function Set-Permission {
             Throw "Counts of identities, permissions and inheritances don't match - please check"
          }
       }
+      $Output = $null
    }
 
    process {
-      if ($PSCmdlet.ShouldProcess('Target', 'Operation')) {
-
+      # convert Default paramset to FMPathParameter
+      if ($PSBoundParameters.ContainsKey('Identity')) {
+         $TempPermission = @()
+         for ($i = 0; $i -lt $Identity.Count; $i++) {
+            $TempPermission += New-FMPermission -Identity $Identity[$i] -Permission $Permission[$i] -inheritance $Inheritance[$i]
+         }#end for
+         $TempFMPP = New-FMPathPermission -Path $Path -InputObject $TempPermission
+      }
+      elseif ($PSBoundParameters.ContainsKey('PermissionObject')) {
+         $TempFMPP = New-FMPathPermission -Path $Path -InputObject $PermissionObject
+      }
+      else {
+         #PathPermissionObject
+         $TempFMPP = $PathPermissionObject
+      }
+      $TempFMPP | ForEach-Object {
+         if ($PSCmdlet.ShouldProcess('Target', 'Operation')) {
+            Invoke-SetACL -InputObject $_
+         }
       }
    }
 
    end {
-
+      $Output
+      if ($PassThru) {
+         $TempFMPP
+      }
    }
 }#end Set-Permission
 

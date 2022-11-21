@@ -7,6 +7,35 @@ enum IMInheritance {
    OnlySubfolders
    OnlyFiles
 }
+
+#The following enum is rebuilding the internal Syste.Security.AccessControl.FilesystemRights for entensability purposes
+# This way I'll be able to add additional "Rights" to the enum for my needs
+# IT's also po
+enum FileRights {
+   ListDirectory = 1
+   ReadData = 1
+   WriteData = 2
+   CreateFiles = 2
+   CreateDirectories = 4
+   AppendData = 4
+   ReadExtendedAttributes = 8
+   WriteExtendedAttributes = 16
+   Traverse = 32
+   ExecuteFile = 32
+   DeleteSubdirectoriesAndFiles = 64
+   ReadAttributes = 128
+   WriteAttributes = 256
+   Write = 278
+   Delete = 65536
+   ReadPermissions = 131072
+   Read = 131209
+   ReadAndExecute = 131241
+   Modify = 197055
+   ChangePermissions = 262144
+   TakeOwnership = 524288
+   Synchronize = 1048576
+   FullControl = 2032127
+}
 <#
 $IMInheritanceConversionTable = @{
    [IMInheritance]::ThisFolderOnly               = @{Propagate = 'NoPropagateInherit'; Inherit = '' };
@@ -23,12 +52,13 @@ $IMInheritanceConversionTable = @{
 Class FMPermission {
    # A helper class to manage permissions
    [String]$Identity
-   [System.Security.AccessControl.FileSystemRights]$Permission
+   #[System.Security.AccessControl.FileSystemRights]$Permission
+   [FileRights]$Permission
    [IMInheritance]$Inheritance
 
    FMPermission(
       [String]$Identity,
-      [System.Security.AccessControl.FileSystemRights]$Permission,
+      [FileRights]$Permission,
       [IMInheritance]$Inheritance
    ) {
       $this.Identity = $Identity
@@ -54,8 +84,11 @@ Class FMPermission {
 # helper function to call constructor
 Function New-FMPermission {
    Param(
+      [ValidateNotNullOrEmpty()]
       [String]$Identity,
+      [ValidateNotNullOrEmpty()]
       [System.Security.AccessControl.FileSystemRights]$Permission,
+      [ValidateNotNullOrEmpty()]
       [IMInheritance]$Inheritance
    )
    [FMPermission]::New($Identity, $Permission, $Inheritance)
@@ -114,14 +147,20 @@ Function New-FMPathPermission {
    Param (
       [Parameter(ParameterSetName = 'Default')]
       [Parameter(ParameterSetName = 'InputObject')]
+      [ValidateNotNullOrEmpty()]
       [String[]]$Path,
+      # TODO make sure parameter isn't empty
       [Parameter(ParameterSetName = 'InputObject')]
+      [ValidateNotNullOrEmpty()]
       [FMPermission[]]$InputObject,
       [Parameter(ParameterSetName = 'Default')]
+      [ValidateNotNullOrEmpty()]
       [String[]]$Identity,
       [Parameter(ParameterSetName = 'Default')]
+      [ValidateNotNullOrEmpty()]
       [System.Security.AccessControl.FileSystemRights[]]$Permission,
       [Parameter(ParameterSetName = 'Default')]
+      [ValidateNotNullOrEmpty()]
       [IMInheritance[]]$Inheritance
    )
    # parameter set 'InputObject'
@@ -140,12 +179,12 @@ Function New-FMPathPermission {
       else {
          #>
       #create permission array
-      $InputObject = @()
+      $TempInput = @()
       for ($i = 0; $i -lt $Identity.count; $i++) {
-         $InputObject += New-FMPermission -Identity $Identity[$i] -Permission $Permission[$i] -Inheritance $Inheritance[$i]
+         $TempInput += New-FMPermission -Identity $Identity[$i] -Permission $Permission[$i] -Inheritance $Inheritance[$i]
       }
       #}
-      [FMPathPermission]::New($Path, $InputObject)
+      [FMPathPermission]::New($Path, $TempInput)
    }#end if
 }#end function
 
