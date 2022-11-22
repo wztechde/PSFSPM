@@ -36,6 +36,7 @@ Describe 'Set-Permission1' -Tag Unit {
          { Set-Permission -Path "$TestDrive\foo.txt" -PermissionObject $PermObject } | Should -Not -Throw
       }
       It 'Should not fail, if several valid paths are given' {
+         Mock Set-ACL {} -ModuleName $ModuleName
          New-Item -Path $TestDrive -Name 'foo.txt' -ItemType File -Force
          { Set-Permission -Path $TestDrive, $TestDrive -PermissionObject $PermObject } | Should -Not -Throw
          { Set-Permission -Path $TestDrive, "$TestDrive\foo.txt" -PermissionObject $PermObject } | Should -Not -Throw
@@ -123,6 +124,33 @@ Describe 'Set-Permission1' -Tag Unit {
          It "Should throw if path doesn't exists" {
             $FMP = New-FMPathPermission -Path C:\gfhrdd33 -InputObject $PermObject
             { Set-Permission -PathPermissionObject $FMP } | Should -Throw "Cannot find path*"
+         }
+         It "Test whatif functionnality by measuring private function calls - invoke-setacl" {
+            Mock Invoke-SetACL {}
+            $FMP = New-FMPathPermission -Path $TestDrive -InputObject $PermObject
+            Set-Permission -PathPermissionObject $FMP -WhatIf
+            Should -Invoke -CommandName Invoke-SetACL -Times 1
+         }
+         It "checks if wrapper function for SetAccessRule is called" {
+            Mock SetAccessRuleProtection {Get-ACL $TestDrive}
+            Mock Set-ACL {}
+            $FMP = New-FMPathPermission -Path $TestDrive -InputObject $PermObject
+            Set-Permission -PathPermissionObject $FMP
+            Should -Invoke -CommandName SetAccessRuleProtection -Times 1
+         }
+         It "checks if Set-ACL is called " {
+            Mock -CommandName "Set-ACL" {}
+            Mock SetAccessRuleProtection {Get-ACL $testDrive}
+            $FMP = New-FMPathPermission -Path $TestDrive -InputObject $PermObject
+            Set-Permission -PathPermissionObject $FMP
+            Should -Invoke -CommandName Set-ACL -Times 1
+         }
+         It "checks if Set-ACL is NOT called with -Whatif" {
+            Mock -CommandName "Set-ACL" {}
+            Mock SetAccessRuleProtection {Get-ACL $testDrive}
+            $FMP = New-FMPathPermission -Path $TestDrive -InputObject $PermObject
+            Set-Permission -PathPermissionObject $FMP -whatif
+            Should -Invoke -CommandName Set-ACL -Times 0
          }
       }
    }#end inmodulescope
