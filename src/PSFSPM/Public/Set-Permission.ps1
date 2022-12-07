@@ -4,14 +4,25 @@
 .DESCRIPTION
    Set-Permission is used to set permissions on one or more paths (can even by piped in to the function).
    You can set permissions for several users at once given as a list.
-.NOTES
-   Information or caveats about the function e.g. 'This function is not supported in Linux'
+   The function also takes several combinations of parameters to perform it's magic
+   Path + PermissionObject allows to give a path in combination with one or more permission objects
+   PathPermissionObject allows to give a full path permission objct to process (path with permissions)
+   DirectoryObject takes a complete directory permission object to process (root / child model)
 .PARAMETER Path
    One or more paths, where you want to set the permission(s) on.
    The validation, if the path exists may provide wrong results - make sure, that the given path
    is not available in current dir.
 .PARAMETER Identity
    One or more identities for which you want to set rights for
+.PARAMETER Permission
+   One or more permissions to set for the according identity(ies)
+.PARAMETER Inheritance
+   One or more inheritances to set for the according identity(ies)
+.PARAMETER PermissionObject
+   One or more PermissionObjects to apply to the given path
+.PARAMETER PathPermissionObject
+   One or more PathPermissionObjects to process
+.PARAMETER
 .EXAMPLE
    Set-Permission -Path C:\Temp -Identity/Principal foo -Permission Write -Inheritance ThisFolderSubfoldersAndFiles
    Set permission for C:\Temp to 'Write' for user 'foo' with inheritance 'ThisFolderSubfoldersAndFiles'
@@ -43,7 +54,7 @@
 
    #>
 function Set-Permission {
-   [CmdletBinding(SupportsShouldProcess)]
+   [CmdletBinding(SupportsShouldProcess,DefaultParameterSetName='Default')]
    param (
       # Path(s) to set permission(s) on
       [Parameter(Position = 0, Mandatory, ValueFromPipeline, ParameterSetName = 'Default')]
@@ -67,12 +78,12 @@ function Set-Permission {
       # A permission object with all necessary permissions
       [Parameter(ParameterSetName = 'PermissionObject', DontShow)]
       [FMPermission[]]$PermissionObject,
+      # A path permission object that also contains path information
       [Parameter(ParameterSetName = 'PathPermissionObject', DontShow)]
       [FMPathPermission[]]$PathPermissionObject,
+      [Parameter(ParameterSetName = 'DirectoryObject', DontShow)]
+      [FMDirectory[]]$DirectoryObject,
       # primarily for testing purposes
-      [Parameter(ParameterSetName = 'Default')]
-      [Parameter(ParameterSetName = 'PermissionObject')]
-      [Parameter(ParameterSetName = 'PathPermissionObject')]
       [Switch]$PassThru
    )
 

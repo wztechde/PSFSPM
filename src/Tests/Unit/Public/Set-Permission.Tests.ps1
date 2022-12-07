@@ -51,23 +51,23 @@ Describe 'Set-Permission1' -Tag Unit {
          { $TestDrive, "$TestDrive\foo.txt" | Set-Permission -PermissionObject $PermObject } | Should -Not -Throw
       }
       It "Should throw if parameter doesn't fit expected type 'Permission'" {
-         { Set-Permission -Path C:\Temp -Identity foo -Permission ready -Inheritance NotGiven } | Should -Throw "Cannot process argument transformation on parameter 'Permission'*"
+         { Set-Permission -Path $TestDrive -Identity foo -Permission ready -Inheritance NotGiven } | Should -Throw "Cannot process argument transformation on parameter 'Permission'*"
       }
       It "Should throw if parameter doesn't fit expected type 'Inheritance'" {
-         { Set-Permission -Path C:\Temp -Identity foo -Permission read -Inheritance NotGiven } | Should -Throw "Cannot process argument transformation on parameter 'Inheritance'*"
+         { Set-Permission -Path $TestDrive -Identity foo -Permission read -Inheritance NotGiven } | Should -Throw "Cannot process argument transformation on parameter 'Inheritance'*"
       }
       It "Should throw if parameter doesn't fit expected type 'PermissionObject'" {
-         { Set-Permission -Path C:\Temp -PermissionObject "Willi" } | Should -Throw "Cannot process argument transformation on parameter 'PermissionObject'*"
+         { Set-Permission -Path $TestDrive -PermissionObject "Willi" } | Should -Throw "Cannot process argument transformation on parameter 'PermissionObject'*"
       }
       It "Should allow an array of 'PermissionObject'" {
-         { Set-Permission -Path C:\Temp -PermissionObject $PermObject, $PermObject } | Should -Not -Throw
+         { Set-Permission -Path $TestDrive -PermissionObject $PermObject, $PermObject } | Should -Not -Throw
       }
       It "Should throw if parameter doesn't fit expected type 'PathPermissionObject'" {
-         { Set-Permission -Path C:\Temp -PathPermissionObject "Willi" } | Should -Throw "Cannot process argument transformation on parameter 'PathPermissionObject'*"
+         { Set-Permission -Path $TestDrive -PathPermissionObject "Willi" } | Should -Throw "Cannot process argument transformation on parameter 'PathPermissionObject'*"
       }
       It "Should allow an array of 'PathPermissionObject'" {
-         $FMPP1=New-FMPathPermission -Path C:\Temp -InputObject $PermObject
-         $FMPP2=New-FMPathPermission -Path C:\Temp -InputObject $PermObject
+         $FMPP1 = New-FMPathPermission -Path $TestDrive -InputObject $PermObject
+         $FMPP2 = New-FMPathPermission -Path $TestDrive -InputObject $PermObject
          { Set-Permission -PathPermissionObject $FMPP1,$FMPP2 } | Should -Not -Throw
       }
 
