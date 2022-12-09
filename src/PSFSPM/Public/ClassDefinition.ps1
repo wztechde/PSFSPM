@@ -1,11 +1,12 @@
 enum IMInheritance {
-   ThisFolderOnly
    ThisFolderSubfoldersAndFiles
    ThisFolderAndSubfolders
+   ThisFolderOnly
    ThisFolderAndFiles
-   OnlySubfoldersFiles
-   OnlySubfolders
-   OnlyFiles
+   SubfoldersAndFilesOnly
+   SubfoldersOnly
+   FilesOnly
+   File
 }
 
 #The following enum is rebuilding the internal Syste.Security.AccessControl.FilesystemRights for entensability purposes
@@ -42,9 +43,9 @@ $IMInheritanceConversionTable = @{
    [IMInheritance]::ThisFolderSubfoldersAndFiles = @{Propagate = 'None'; Inherit = 'ContainerInherit,ObjectInherit' };
    [IMInheritance]::ThisFolderAndSubfolders          = @{Propagate = 'None'; Inherit = 'ContainerInherit' };
    [IMInheritance]::ThisFolderAndFiles              = @{Propagate = 'None'; Inherit = 'ObjectInherit' };
-   [IMInheritance]::OnlySubfoldersFiles          = @{Propagate = 'InheritOnly'; Inherit = 'ContainerInherit,ObjectInherit' };
-   [IMInheritance]::OnlySubfolders               = @{Propagate = 'InheritOnly'; Inherit = 'ContainerInherit' };
-   [IMInheritance]::OnlyFiles                    = @{Propagate = 'InheritOnly'; Inherit = 'ObjectInherit' }
+   [IMInheritance]::SubfoldersAndFilesOnly          = @{Propagate = 'InheritOnly'; Inherit = 'ContainerInherit,ObjectInherit' };
+   [IMInheritance]::SubfoldersOnly               = @{Propagate = 'InheritOnly'; Inherit = 'ContainerInherit' };
+   [IMInheritance]::FilesOnly                    = @{Propagate = 'InheritOnly'; Inherit = 'ObjectInherit' }
 }
 #>
 # https://learn.microsoft.com/de-de/powershell/module/microsoft.powershell.security/set-acl?view=powershell-7.2
@@ -67,15 +68,17 @@ Class FMPermission {
    }
 
    #methods
+   # https://community.spiceworks.com/topic/775372-powershell-to-change-permissions-on-fodlers
    [hashtable]GetInheritance() {
       $IMInheritanceConversionTable = @{
-         [IMInheritance]::ThisFolderOnly               = @{Propagate = 'None'; Inherit = 'None' };
          [IMInheritance]::ThisFolderSubfoldersAndFiles = @{Propagate = 'None'; Inherit = 'ContainerInherit, ObjectInherit' };
          [IMInheritance]::ThisFolderAndSubfolders          = @{Propagate = 'None'; Inherit = 'ContainerInherit' };
+         [IMInheritance]::ThisFolderOnly               = @{Propagate = 'None'; Inherit = 'None' };
          [IMInheritance]::ThisFolderAndFiles              = @{Propagate = 'None'; Inherit = 'ObjectInherit' };
-         [IMInheritance]::OnlySubfoldersFiles          = @{Propagate = 'InheritOnly'; Inherit = 'ContainerInherit, ObjectInherit' };
-         [IMInheritance]::OnlySubfolders               = @{Propagate = 'InheritOnly'; Inherit = 'ContainerInherit' };
-         [IMInheritance]::OnlyFiles                    = @{Propagate = 'InheritOnly'; Inherit = 'ObjectInherit' }
+         [IMInheritance]::SubfoldersAndFilesOnly          = @{Propagate = 'InheritOnly'; Inherit = 'ContainerInherit, ObjectInherit' };
+         [IMInheritance]::SubfoldersOnly               = @{Propagate = 'InheritOnly'; Inherit = 'ContainerInherit' };
+         [IMInheritance]::FilesOnly                    = @{Propagate = 'InheritOnly'; Inherit = 'ObjectInherit' }
+         [IMInheritance]::File                    = @{Propagate = 'None'; Inherit = 'None' }
       }
       return $IMInheritanceConversionTable[$this.Inheritance]
    }
@@ -100,7 +103,7 @@ Class FMPathPermission {
    [hashtable]$ACRule = @{
       # as standard break inheritance and copy existing acls
       # see example 4: https://learn.microsoft.com/de-de/powershell/module/microsoft.powershell.security/set-acl?view=powershell-7.2
-      isProtected         = $true
+      isProtected         = $false
       preserveInheritance = $true
    }
 

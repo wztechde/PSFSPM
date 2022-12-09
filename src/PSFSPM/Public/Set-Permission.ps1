@@ -53,7 +53,7 @@
 
    #>
 function Set-Permission {
-   [CmdletBinding(SupportsShouldProcess,DefaultParameterSetName='Default')]
+   [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'Default')]
    param (
       # Path(s) to set permission(s) on
       [Parameter(Position = 0, Mandatory, ValueFromPipeline, ParameterSetName = 'Default')]
@@ -91,7 +91,7 @@ function Set-Permission {
             Throw "Counts of identities, permissions and inheritances don't match - please check"
          }
       }
-      $Output = $null
+      $Output = @()
    }
 
    process {
@@ -111,17 +111,17 @@ function Set-Permission {
          $TempFMPP = $PathPermissionObject
       }
       $TempFMPP | ForEach-Object {
-#         if ($PSCmdlet.ShouldProcess("$($TempFMPP.Path)", 'Invoke-SetACL')) {
-            Invoke-SetACL -InputObject $_
-#         }
+         #         if ($PSCmdlet.ShouldProcess("$($TempFMPP.Path)", 'Invoke-SetACL')) {
+         $output += Invoke-SetACL -InputObject $_
+         #         }
       }
    }
 
    end {
-      $Output
       if ($PassThru) {
-         $TempFMPP
+         Return $TempFMPP
       }
+      $Output
    }
 }#end Set-Permission
 

@@ -24,23 +24,21 @@ InModulescope -ModuleName $ModuleName {
     Context "Check inner function call" {
         It "Should call SetAccessRuleProtection - once" {
             Mock SetAccessRuleProtection { Get-ACL $TestDrive }
-            Mock AddAccessRule { Get-ACL $TestDrive }
+            Mock AddAccess { Get-ACL $TestDrive }
             Mock Set-ACL {}
             Invoke-setACL -InputObject $PPM1
             Should -Invoke SetAccessRuleProtection -Times 1
-            Should -Invoke Set-ACL -Times 1
-            Should -Invoke AddAccessRule -Times 1
+            Should -Invoke AddAccess -Times 1
         }
         # The FMPathPermissionObjhect can hold more than one path to apply permissions to
         # Helps to easily assign a permission construct to a bunch of path (i.e. child in DirectoryObject)
         It "Should call SetAccessRuleProtection - twice" {
             Mock SetAccessRuleProtection { Get-ACL $TestDrive }
-            Mock AddAccessRule { Get-ACL $TestDrive }
+            Mock AddAccess { Get-ACL $TestDrive }
             Mock Set-ACL {}
             Invoke-setACL -InputObject $PPM3
             Should -Invoke SetAccessRuleProtection -Times 2
-            Should -Invoke Set-ACL -Times 2
-            Should -Invoke AddAccessRule -Times 2
+            Should -Invoke AddAccess -Times 2
         }
     }
 }

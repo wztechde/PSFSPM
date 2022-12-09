@@ -105,7 +105,7 @@ Describe 'Class-Tests' -Tag Unit {
       BeforeAll {
          $FMPP1 = New-FMPathPermission -Path C:\Temp -Identity foo -Permission Write -Inheritance ThisFolderAndFiles
          $FMPP2 = New-FMPathPermission -Path C:\Temp -Identity bar -Permission Read -Inheritance ThisFolderOnly
-         $FMPP3 = New-FMPathPermission -Path C:\Temp -Identity foo, bar -Permission Write, Read -Inheritance ThisFolderAndFiles, OnlySubfolders
+         $FMPP3 = New-FMPathPermission -Path C:\Temp -Identity foo, bar -Permission Write, Read -Inheritance ThisFolderAndFiles, SubfoldersOnly
       }
       It "checks, that method is accessible" {
          { $FMPP1.GetFileSystemAccessRule() } | Should -Not -Throw

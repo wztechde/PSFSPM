@@ -12,8 +12,8 @@ function Invoke-SetACL {
         if ($PSCmdlet.ShouldProcess("$Path", "Set-ACL")) {
             Write-Verbose "Set Access Rule Protection on $($InputObject.Path): $($InputObject.ACRule.isProtected),$($InputObject.ACRule.preserveInheritance)"
             SetAccessRuleProtection -InputObject $InputObject -Path $Path
+            AddAccess -Path $Path -InputObject $InputObject    #now process the permissions
         }
-        AddAccess -Path $Path -InputObject $InputObject    #now process the permissions
     }
 
 }
@@ -26,7 +26,7 @@ function SetAccessRuleProtection {
     $ACL = Get-Acl -Path $Path
     $ACL.SetAccessRuleProtection($InputObject.ACRule.isProtected, $InputObject.ACRule.preserveInheritance) | Out-Null
     Set-Acl -Path $Path -AclObject $ACL | Out-Null
-    Get-Acl -Path $Path
+    #Get-Acl -Path $Path
 }
 <#
 function AddAccessRule {
