@@ -22,7 +22,6 @@
    One or more PermissionObjects to apply to the given path
 .PARAMETER PathPermissionObject
    One or more PathPermissionObjects to process
-.PARAMETER
 .EXAMPLE
    Set-Permission -Path C:\Temp -Identity/Principal foo -Permission Write -Inheritance ThisFolderSubfoldersAndFiles
    Set permission for C:\Temp to 'Write' for user 'foo' with inheritance 'ThisFolderSubfoldersAndFiles'
@@ -81,8 +80,6 @@ function Set-Permission {
       # A path permission object that also contains path information
       [Parameter(ParameterSetName = 'PathPermissionObject', DontShow)]
       [FMPathPermission[]]$PathPermissionObject,
-      [Parameter(ParameterSetName = 'DirectoryObject', DontShow)]
-      [FMDirectory[]]$DirectoryObject,
       # primarily for testing purposes
       [Switch]$PassThru
    )

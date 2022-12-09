@@ -70,10 +70,10 @@ Class FMPermission {
    [hashtable]GetInheritance() {
       $IMInheritanceConversionTable = @{
          [IMInheritance]::ThisFolderOnly               = @{Propagate = 'None'; Inherit = 'None' };
-         [IMInheritance]::ThisFolderSubfoldersAndFiles = @{Propagate = 'None'; Inherit = 'ContainerInherit,ObjectInherit' };
+         [IMInheritance]::ThisFolderSubfoldersAndFiles = @{Propagate = 'None'; Inherit = 'ContainerInherit, ObjectInherit' };
          [IMInheritance]::ThisFolderSubfolder          = @{Propagate = 'None'; Inherit = 'ContainerInherit' };
          [IMInheritance]::ThisFolderFiles              = @{Propagate = 'None'; Inherit = 'ObjectInherit' };
-         [IMInheritance]::OnlySubfoldersFiles          = @{Propagate = 'InheritOnly'; Inherit = 'ContainerInherit,ObjectInherit' };
+         [IMInheritance]::OnlySubfoldersFiles          = @{Propagate = 'InheritOnly'; Inherit = 'ContainerInherit, ObjectInherit' };
          [IMInheritance]::OnlySubfolders               = @{Propagate = 'InheritOnly'; Inherit = 'ContainerInherit' };
          [IMInheritance]::OnlyFiles                    = @{Propagate = 'InheritOnly'; Inherit = 'ObjectInherit' }
       }
