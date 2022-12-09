@@ -94,7 +94,7 @@ Describe 'Set-Permission1' -Tag Unit {
          $result[1].gettype() | Should -Be "FMPathPermission"
       }
       It "Paramset 'Default' - should return FMPP array when fed with multiple data" {
-         $result = Set-Permission $Testdrive -Identity foo, bar -Permission Write, Read -Inheritance ThisFolderOnly, ThisFolderFiles -PassThru
+         $result = Set-Permission $Testdrive -Identity foo, bar -Permission Write, Read -Inheritance ThisFolderOnly, ThisFolderAndFiles -PassThru
          $result[1].gettype() | Should -Be "FMPathPermission"
          $result[1].Permission.Count | Should -Be 2
       }

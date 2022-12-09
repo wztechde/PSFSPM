@@ -1,8 +1,8 @@
 enum IMInheritance {
    ThisFolderOnly
    ThisFolderSubfoldersAndFiles
-   ThisFolderSubfolder
-   ThisFolderFiles
+   ThisFolderAndSubfolders
+   ThisFolderAndFiles
    OnlySubfoldersFiles
    OnlySubfolders
    OnlyFiles
@@ -40,8 +40,8 @@ enum FileRights {
 $IMInheritanceConversionTable = @{
    [IMInheritance]::ThisFolderOnly               = @{Propagate = 'NoPropagateInherit'; Inherit = '' };
    [IMInheritance]::ThisFolderSubfoldersAndFiles = @{Propagate = 'None'; Inherit = 'ContainerInherit,ObjectInherit' };
-   [IMInheritance]::ThisFolderSubfolder          = @{Propagate = 'None'; Inherit = 'ContainerInherit' };
-   [IMInheritance]::ThisFolderFiles              = @{Propagate = 'None'; Inherit = 'ObjectInherit' };
+   [IMInheritance]::ThisFolderAndSubfolders          = @{Propagate = 'None'; Inherit = 'ContainerInherit' };
+   [IMInheritance]::ThisFolderAndFiles              = @{Propagate = 'None'; Inherit = 'ObjectInherit' };
    [IMInheritance]::OnlySubfoldersFiles          = @{Propagate = 'InheritOnly'; Inherit = 'ContainerInherit,ObjectInherit' };
    [IMInheritance]::OnlySubfolders               = @{Propagate = 'InheritOnly'; Inherit = 'ContainerInherit' };
    [IMInheritance]::OnlyFiles                    = @{Propagate = 'InheritOnly'; Inherit = 'ObjectInherit' }
@@ -71,8 +71,8 @@ Class FMPermission {
       $IMInheritanceConversionTable = @{
          [IMInheritance]::ThisFolderOnly               = @{Propagate = 'None'; Inherit = 'None' };
          [IMInheritance]::ThisFolderSubfoldersAndFiles = @{Propagate = 'None'; Inherit = 'ContainerInherit, ObjectInherit' };
-         [IMInheritance]::ThisFolderSubfolder          = @{Propagate = 'None'; Inherit = 'ContainerInherit' };
-         [IMInheritance]::ThisFolderFiles              = @{Propagate = 'None'; Inherit = 'ObjectInherit' };
+         [IMInheritance]::ThisFolderAndSubfolders          = @{Propagate = 'None'; Inherit = 'ContainerInherit' };
+         [IMInheritance]::ThisFolderAndFiles              = @{Propagate = 'None'; Inherit = 'ObjectInherit' };
          [IMInheritance]::OnlySubfoldersFiles          = @{Propagate = 'InheritOnly'; Inherit = 'ContainerInherit, ObjectInherit' };
          [IMInheritance]::OnlySubfolders               = @{Propagate = 'InheritOnly'; Inherit = 'ContainerInherit' };
          [IMInheritance]::OnlyFiles                    = @{Propagate = 'InheritOnly'; Inherit = 'ObjectInherit' }
