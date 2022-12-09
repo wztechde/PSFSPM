@@ -172,6 +172,83 @@ Describe "Invoke-Setacl" -Tag Infra {
             $Access = (Get-ACL "$($FI_Bar.Fullname)").Access
             $Access.IdentityReference -match "Pester1" | Should -BeNullOrEmpty #nor subfolder
         }
+        It "'ThisFolderAndFiles'" {
+            $param = @{
+                Path        = $FI_Bar
+                Identity    = @("Pester1")
+                Permission  = @("Write")
+                Inheritance = @("ThisFolderAndFiles")
+            }
+            $FPM1 = New-FMPathPermission @param
+            Set-Permission -PathPermissionObject $FPM1
+            $Access = (Get-ACL $FI_Bar.fullname).Access
+            $FilterUser = $access | Where-Object { $_.IdentityReference -match "Pester1" }
+            $FilterUser.InheritanceFlags | Should -be "ObjectInherit"
+            $FilterUser.PropagationFlags | Should -be "None"
+
+            $Access.IdentityReference -match "Pester1" | Should -Not -BeNullOrEmpty #only folder has identity
+            $Access = (Get-ACL "$($FI_Bar.Fullname)\test_Bar.txt").Access
+            $Access.IdentityReference -match "Pester1" | Should -Not -BeNullOrEmpty #not file
+            $Access = (Get-ACL "$($FI_Clara.Fullname)").Access
+            <#
+            $Access.IdentityReference -match "Pester1" | Should -BeNullOrEmpty #nor subfolder
+            $Access = (Get-ACL "$($FI_Clara.Fullname)").Access
+            $Access.IdentityReference -match "Pester1" | Should -BeNullOrEmpty #nor subfolder
+            $Access = (Get-ACL "$($FI_Donna.Fullname)").Access
+            $Access.IdentityReference -match "Pester1" | Should -BeNullOrEmpty #nor subfolder
+            #>
+        }
+        It "'SubFoldersAndFilesOnly'" {
+            $param = @{
+                Path        = $FI_Bar
+                Identity    = @("Pester1")
+                Permission  = @("Write")
+                Inheritance = @("SubFoldersAndFilesOnly")
+            }
+            $FPM1 = New-FMPathPermission @param
+            Set-Permission -PathPermissionObject $FPM1
+            $Access = (Get-ACL $FI_Bar.fullname).Access
+            $FilterUser = $access | Where-Object { $_.IdentityReference -match "Pester1" }
+            $FilterUser.InheritanceFlags | Should -be "ContainerInherit, ObjectInherit"
+            $FilterUser.PropagationFlags | Should -be "InheritOnly"
+            $Access.IdentityReference -match "Pester1" | Should -Not -BeNullOrEmpty #only folder has identity
+            $Access = (Get-ACL "$($FI_Bar.Fullname)\test_bar.txt").Access
+            $Access.IdentityReference -match "Pester1" | Should -Not -BeNullOrEmpty #not file
+        }
+        It "'SubFoldersOnly'" {
+            $param = @{
+                Path        = $FI_Bar
+                Identity    = @("Pester2")
+                Permission  = @("Write")
+                Inheritance = @("SubFoldersOnly")
+            }
+            $FPM1 = New-FMPathPermission @param
+            Set-Permission -PathPermissionObject $FPM1
+            $Access = (Get-ACL $FI_Bar.fullname).Access
+            $FilterUser=$access | Where-Object {$_.IdentityReference -match "Pester2"}
+            $FilterUser.InheritanceFlags | Should -be "ContainerInherit"
+            $FilterUser.PropagationFlags | Should -be "InheritOnly"
+            $Access = (Get-ACL "$($FI_Bar.Fullname)\test_bar.txt").Access
+            $Access.IdentityReference -match "Pester2" | Should -BeNullOrEmpty #not file
+            $Access = (Get-ACL "$($FI_Clara.Fullname)").Access
+            $Access.IdentityReference -match "Pester2" | Should -Not -BeNullOrEmpty #nor subfolder
+        }
+        It "'FilesOnly'" {
+            $param = @{
+                Path        = $FI_Bar
+                Identity    = @("Pester2")
+                Permission  = @("Write")
+                Inheritance = @("FilesOnly")
+            }
+            $FPM1 = New-FMPathPermission @param
+            Set-Permission -PathPermissionObject $FPM1
+            $Access = (Get-ACL $FI_Bar.fullname).Access
+            $FilterUser=$access | Where-Object {$_.IdentityReference -match "Pester2"}
+            $FilterUser.InheritanceFlags | Should -be "ObjectInherit"
+            $FilterUser.PropagationFlags | Should -be "InheritOnly"
+            $Access = (Get-ACL "$($FI_Bar.Fullname)\test_bar.txt").Access
+            $Access.IdentityReference -match "Pester2" | Should -not -BeNullOrEmpty #not file
+        }
 
     }
 
