@@ -245,8 +245,8 @@ Add-BuildTask Test {
         $pesterConfiguration.Run.PassThru = $true
         $pesterConfiguration.Run.Exit = $false
         $pesterConfiguration.CodeCoverage.Enabled = $true
-        #$pesterConfiguration.CodeCoverage.Path = "..\..\..\$ModuleName\*\*.ps1"
-        $pesterConfiguration.CodeCoverage.Path = "..\..\$ModuleName\*\*.ps1"
+        $pesterConfiguration.CodeCoverage.Path = "..\..\..\$ModuleName\*\*.ps1"
+        #$pesterConfiguration.CodeCoverage.Path = ".\$ModuleName\*\*.ps1"
         $pesterConfiguration.CodeCoverage.CoveragePercentTarget = $script:coverageThreshold
         $pesterConfiguration.CodeCoverage.OutputPath = "$codeCovPath\CodeCoverage.xml"
         $pesterConfiguration.CodeCoverage.OutputFormat = 'JaCoCo'
@@ -274,7 +274,7 @@ Add-BuildTask Test {
         Write-Build Gray ('      ...CODE COVERAGE - CommandsExecutedCount: {0}' -f $testResults.CodeCoverage.CommandsExecutedCount)
         Write-Build Gray ('      ...CODE COVERAGE - CommandsAnalyzedCount: {0}' -f $testResults.CodeCoverage.CommandsAnalyzedCount)
 
-        if ($testResults.CodeCoverage.NumberOfCommandsExecuted -ne 0) {
+        if (($testResults.CodeCoverage.NumberOfCommandsExecuted -ne 0) -and ($testResults.CodeCoverage.CommandsAnalyzedCount -ne 0)) {
             $coveragePercent = '{0:N2}' -f ($testResults.CodeCoverage.CommandsExecutedCount / $testResults.CodeCoverage.CommandsAnalyzedCount * 100)
 
             <#

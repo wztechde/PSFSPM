@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-   Get-ChilditemEnhanced is am enhanced version of Get-Childitem
+   Get-ChilditemEnhanced is an enhanced version of Get-Childitem
 .DESCRIPTION
    Get-ChilditemEnhanced adds an additional parameter -StartDepth
 .PARAMETER Attributes
@@ -43,7 +43,7 @@
    Specify a URI to a help page, this will show when Get-Help -Online is used.
 .EXAMPLE
    Get-ChilditemEnhanced C:\Temp -StartDepth 3
-   Return all items from level 3 down, i.d. C:\Temp\1\2\3
+   Return all items from level 3 down, i.e. C:\Temp\1\2\3
 #>
 Function Get-ChildItemEnhanced {
    <#
@@ -74,6 +74,7 @@ Function Get-ChildItemEnhanced {
 
       [int]$Depth,
 
+      [Alias('MinimumDepth')]
       [int]$StartDepth,
 
       [switch]$Force,
