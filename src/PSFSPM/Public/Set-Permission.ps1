@@ -97,6 +97,7 @@ function Set-Permission {
    process {
       # convert Default paramset to FMPathParameter
       if ($PSBoundParameters.ContainsKey('Identity')) {
+         Write-Verbose "$((Get-Date).TimeofDay) Parameterset: Default"
          $TempPermission = @()
          for ($i = 0; $i -lt $Identity.Count; $i++) {
             $TempPermission += New-FMPermission -Identity $Identity[$i] -Permission $Permission[$i] -inheritance $Inheritance[$i]
@@ -104,10 +105,12 @@ function Set-Permission {
          $TempFMPP = New-FMPathPermission -Path $Path -InputObject $TempPermission
       }
       elseif ($PSBoundParameters.ContainsKey('PermissionObject')) {
+         Write-Verbose "$((Get-Date).TimeofDay) Parameterset: PermissionObject"
          $TempFMPP = New-FMPathPermission -Path $Path -InputObject $PermissionObject
       }
       else {
          #PathPermissionObject
+         Write-Verbose "$((Get-Date).TimeofDay) Parameterset: PathPermissionObject"
          $TempFMPP = $PathPermissionObject
       }
       $TempFMPP | ForEach-Object {
@@ -124,4 +127,3 @@ function Set-Permission {
       $Output
    }
 }#end Set-Permission
-

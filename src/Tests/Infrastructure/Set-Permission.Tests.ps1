@@ -9,13 +9,12 @@ if (Get-Module -Name $ModuleName -ErrorAction 'SilentlyContinue') {
 }
 Import-Module $PathToManifest -Force
 
-Describe "Invoke-Setacl" -Tag Infra {
+Describe "Invoke-Setacl" -Tag Infrastructure {
     # prerequisites
     BeforeAll {
         New-LocalUser Pester1 -NoPassword
         New-LocalUser Pester2 -NoPassword
         New-LocalUser Pester3 -NoPassword
-
         New-LocalGroup GPester1 -Description 'Pester Group 1'
         New-LocalGroup GPester2 -Description 'Pester Group 2'
         Add-LocalGroupMember -Group GPester1 -Member Pester1
@@ -251,5 +250,4 @@ Describe "Invoke-Setacl" -Tag Infra {
         }
 
     }
-
 }#Describe Get-ChilditemEnhanced

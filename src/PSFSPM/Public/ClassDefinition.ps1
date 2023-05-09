@@ -9,9 +9,9 @@ enum IMInheritance {
    File
 }
 
-#The following enum is rebuilding the internal Syste.Security.AccessControl.FilesystemRights for entensability purposes
+# The following enum is rebuilding the internal System.Security.AccessControl.FilesystemRights for extensability purposes
 # This way I'll be able to add additional "Rights" to the enum for my needs
-# IT's also po
+# Firstly I integrated the right delete, which will remove the given permission(s) completely from the ACL
 enum FileRights {
    ListDirectory = 1
    ReadData = 1
@@ -72,13 +72,13 @@ Class FMPermission {
    [hashtable]GetInheritance() {
       $IMInheritanceConversionTable = @{
          [IMInheritance]::ThisFolderSubfoldersAndFiles = @{Propagate = 'None'; Inherit = 'ContainerInherit, ObjectInherit' };
-         [IMInheritance]::ThisFolderAndSubfolders          = @{Propagate = 'None'; Inherit = 'ContainerInherit' };
+         [IMInheritance]::ThisFolderAndSubfolders      = @{Propagate = 'None'; Inherit = 'ContainerInherit' };
          [IMInheritance]::ThisFolderOnly               = @{Propagate = 'None'; Inherit = 'None' };
-         [IMInheritance]::ThisFolderAndFiles              = @{Propagate = 'None'; Inherit = 'ObjectInherit' };
-         [IMInheritance]::SubfoldersAndFilesOnly          = @{Propagate = 'InheritOnly'; Inherit = 'ContainerInherit, ObjectInherit' };
+         [IMInheritance]::ThisFolderAndFiles           = @{Propagate = 'None'; Inherit = 'ObjectInherit' };
+         [IMInheritance]::SubfoldersAndFilesOnly       = @{Propagate = 'InheritOnly'; Inherit = 'ContainerInherit, ObjectInherit' };
          [IMInheritance]::SubfoldersOnly               = @{Propagate = 'InheritOnly'; Inherit = 'ContainerInherit' };
          [IMInheritance]::FilesOnly                    = @{Propagate = 'InheritOnly'; Inherit = 'ObjectInherit' }
-         [IMInheritance]::File                    = @{Propagate = 'None'; Inherit = 'None' }
+         [IMInheritance]::File                         = @{Propagate = 'None'; Inherit = 'None' }
       }
       return $IMInheritanceConversionTable[$this.Inheritance]
    }
@@ -97,6 +97,9 @@ Function New-FMPermission {
    [FMPermission]::New($Identity, $Permission, $Inheritance)
 }#end function
 
+<#
+FMPathPermission holds an array of paths and an array of permissions to apply on each of these paths
+#>
 Class FMPathPermission {
    [String[]]$Path
    [FMPermission[]]$Permission
@@ -152,7 +155,6 @@ Function New-FMPathPermission {
       [Parameter(ParameterSetName = 'InputObject')]
       [ValidateNotNullOrEmpty()]
       [String[]]$Path,
-      # TODO make sure parameter isn't empty
       [Parameter(ParameterSetName = 'InputObject')]
       [ValidateNotNullOrEmpty()]
       [FMPermission[]]$InputObject,
@@ -241,5 +243,5 @@ Function New-FMDirectory {
       [FMPathPermission]$Root,
       [FMPathPermission[]]$Child
    )
-   [FMDirectory]::New($Root, $Child)
+   [FMDirectory]::New($Root,$Child)
 }

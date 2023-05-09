@@ -233,6 +233,17 @@
             "group": "test"
         },
         {
+            "label": "Pester-Single-Infra",
+            "type": "shell",
+            "command": "Import-Module -Name '${workspaceFolder}/src/PSFSPM/PSFSPM.psm1';Invoke-Pester '${workspaceFolder}/src/Tests/Infrastructure/*/${input:functionName}.Tests.ps1' -Output Detailed",
+            "problemMatcher": "$pester",
+            "presentation": {
+                "echo": false,
+                "showReuseMessage": false
+            },
+            "group": "test"
+        },
+        {
             "label": "DevCC-Single",
             "type": "shell",
             "command": "Import-Module -Name '${workspaceFolder}/src/PSFSPM/PSFSPM.psm1';$pesterConfig = New-PesterConfiguration;$pesterConfig.run.Path = '${workspaceFolder}/src/Tests/Unit/*/${input:functionName}.Tests.ps1';$pesterConfig.CodeCoverage.Enabled = $true;$pesterConfig.CodeCoverage.Path = '${workspaceFolder}/src/PSFSPM/*/${input:functionName}.ps1';$pesterConfig.CodeCoverage.OutputPath = '${workspaceFolder}/cov.xml';$pesterConfig.CodeCoverage.OutputFormat = 'CoverageGutters';Invoke-Pester -Configuration $pesterConfig",

@@ -112,7 +112,7 @@ InModuleScope -ModuleName $ModuleName {
             Set-Permission $Testdrive -Identity foo -Permission Read -Inheritance ThisFolderOnly
             Should -Invoke Invoke-SetACL -Times 1
          }
-         It "Should call Invoke-SetACL twice - two FSPM objects (like in directory object" {
+         It "Should call Invoke-SetACL twice - two FSPM objects (like in directory object)" {
             $FMP = New-FMPathPermission -Path $Testdrive -InputObject $PermObject
             Set-Permission -PathPermissionObject $FMP, $FMP -PassThru
             Should -Invoke Invoke-SetACL -Times 2
@@ -141,13 +141,16 @@ InModuleScope -ModuleName $ModuleName {
             Should -Invoke -CommandName SetAccessRuleProtection -Times 1
          }
          It "checks if AddAccess is called " {
+            $DBG_SAVE=$DebugPreference
+            $DebugPreference="Continue"
             Mock -CommandName "AddAccess" {}
             Mock SetAccessRuleProtection { Get-ACL $testDrive }
             $FMP = New-FMPathPermission -Path $TestDrive -InputObject $PermObject
-            Set-Permission -PathPermissionObject $FMP
+            Set-Permission -PathPermissionObject $FMP -verbose
             Should -Invoke -CommandName AddAccess -Times 1
+            $DebugPreference=$DBG_SAVE
          }
-         It "checks if Set-ACL is NOT called with -Whatif" {
+         It "checks if Set-ACL is NOT called when '-Whatif' is given" {
             Mock -CommandName "Set-ACL" {}
             Mock SetAccessRuleProtection { Get-ACL $testDrive }
             $FMP = New-FMPathPermission -Path $TestDrive -InputObject $PermObject

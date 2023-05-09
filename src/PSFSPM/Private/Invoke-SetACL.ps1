@@ -9,8 +9,9 @@ function Invoke-SetACL {
     }
     # there are multiple paths possible
     Foreach ($Path in $InputObject.Path) {
-        if ($PSCmdlet.ShouldProcess("$Path", "Set-ACL")) {
-            Write-Verbose "Set Access Rule Protection on $($InputObject.Path): $($InputObject.ACRule.isProtected),$($InputObject.ACRule.preserveInheritance)"
+        if ($PSCmdlet.ShouldProcess("$((Get-Date).TimeofDay) $Path", "Set-ACL")) {
+            Write-Verbose "$((Get-Date).TimeofDay) Set Access Rule Protection on $($InputObject.Path)"
+            Write-Debug "$((Get-Date).TimeofDay) isProtected: $($InputObject.ACRule.isProtected), preserveInheritance: $($InputObject.ACRule.preserveInheritance)"
             SetAccessRuleProtection -InputObject $InputObject -Path $Path
             AddAccess -Path $Path -InputObject $InputObject    #now process the permissions
         }
@@ -68,5 +69,8 @@ for each path
     Set-ACL
     for each permisison
         1. Add Access Rule
-    Set-ACL
+    Set-
+
+
+    fdglghflHGKFHGKHFHFKHGFKDGGFDGFGFDGGFfdfff
 #>
