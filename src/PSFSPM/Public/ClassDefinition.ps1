@@ -36,6 +36,7 @@ enum FileRights {
    TakeOwnership = 524288
    Synchronize = 1048576
    FullControl = 2032127
+   DeleteFromACL = 512
 }
 <#
 $IMInheritanceConversionTable = @{
@@ -69,7 +70,7 @@ Class FMPermission {
 
    #methods
    # https://community.spiceworks.com/topic/775372-powershell-to-change-permissions-on-fodlers
-   [hashtable]GetInheritance() {
+   [hashtable]Get_ExplicitInheritance() {
       $IMInheritanceConversionTable = @{
          [IMInheritance]::ThisFolderSubfoldersAndFiles = @{Propagate = 'None'; Inherit = 'ContainerInherit, ObjectInherit' };
          [IMInheritance]::ThisFolderAndSubfolders      = @{Propagate = 'None'; Inherit = 'ContainerInherit' };
@@ -82,6 +83,22 @@ Class FMPermission {
       }
       return $IMInheritanceConversionTable[$this.Inheritance]
    }
+
+   [System.Security.AccessControl.FileSystemAccessRule]Get_FileSystemAccessRule () {
+      # mask out own permission(s) to avoid cast error
+      $TempPermission=$this.Permission
+      if ($TempPermission -like "DeleteFromACL") {
+         $TempPermission = "Delete"
+      }
+      $TempPermission = $this.Identity,
+      $TempPermission,
+      $this.Get_ExplicitInheritance().Inherit,
+      $this.Get_ExplicitInheritance().Propagate,
+      [System.Security.AccessControl.AccessControlType]::Allow
+      $Output = New-Object System.Security.AccessControl.FileSystemAccessRule $TempPermission
+      return $Output
+   }
+
 }#end class
 
 # helper function to call constructor
@@ -90,7 +107,7 @@ Function New-FMPermission {
       [ValidateNotNullOrEmpty()]
       [String]$Identity,
       [ValidateNotNullOrEmpty()]
-      [System.Security.AccessControl.FileSystemRights]$Permission,
+      [FileRights]$Permission,
       [ValidateNotNullOrEmpty()]
       [IMInheritance]$Inheritance
    )
@@ -98,10 +115,10 @@ Function New-FMPermission {
 }#end function
 
 <#
-FMPathPermission holds an array of paths and an array of permissions to apply on each of these paths
+FMPathPermission a path and an array of permissions to apply this path
 #>
 Class FMPathPermission {
-   [String[]]$Path
+   [String]$Path
    [FMPermission[]]$Permission
    [hashtable]$ACRule = @{
       # as standard break inheritance and copy existing acls
@@ -120,31 +137,34 @@ Class FMPathPermission {
    }
 
    # methods
-   [System.Security.AccessControl.FileSystemAccessRule[]]GetFileSystemAccessRule () {
+   [System.Security.AccessControl.FileSystemAccessRule[]]Get_FileSystemAccessRule () {
       $Output = @()
-      <#
-      if ($this.Permission.Count -eq 1) {
-         $TempPermission = $this.Permission.Identity,
-         $this.Permission.permission,
-         $this.Permission.GetInheritance().Inherit,
-         $this.Permission.GetInheritance().Propagate,
-         [System.Security.AccessControl.AccessControlType]::Allow
-         $Output += New-Object System.Security.AccessControl.FileSystemAccessRule $TempPermission
+      foreach ($Perm in $this.Permission) {
+         $Output += $Perm.Get_FileSystemAccessRule()
       }
-      else {
-         #>
-      # more than 1 permission - use loop
-      for ($i = 0 ; $i -lt $this.Permission.count; $i++) {
-         $TempPermission = $this.Permission[$i].Identity,
-         $this.Permission[$i].permission,
-         $this.Permission[$i].GetInheritance().Inherit,
-         $this.Permission[$i].GetInheritance().Propagate,
-         [System.Security.AccessControl.AccessControlType]::Allow
-         $Output += New-Object System.Security.AccessControl.FileSystemAccessRule $TempPermission
-      }
-      #      }
       return $Output
    }
+
+   [System.Security.AccessControl.FileSystemSecurity]Set_Access() {
+      $ACL = Get-Acl $this.Path
+      foreach ($Perm in $this.Permission) {
+         $UserID = New-Object System.Security.Principal.NTAccount $Perm.Identity
+         If ($Perm.Permission -like "DeleteFromACL") {
+            $ACL.PurgeAccessRules($UserID)
+         }
+         else {
+            $AccessObject =
+            New-Object System.Security.AccessControl.FileSystemAccessRule(
+               $UserID,
+               $Perm.Permission,
+            ($Perm.Get_ExplicitInheritance()).Inherit,
+            ($Perm.Get_ExplicitInheritance()).Propagate, "Allow")
+            $ACL.AddAccessRule($AccessObject)
+         }# end if
+      }# end foreach
+      $Output = Set-ACl -Path $this.Path -AclObject $ACL -Passthru
+      return $Output
+   }# end method
 }#end class
 
 #helper function to call constructor
@@ -154,7 +174,7 @@ Function New-FMPathPermission {
       [Parameter(ParameterSetName = 'Default')]
       [Parameter(ParameterSetName = 'InputObject')]
       [ValidateNotNullOrEmpty()]
-      [String[]]$Path,
+      [String]$Path,
       [Parameter(ParameterSetName = 'InputObject')]
       [ValidateNotNullOrEmpty()]
       [FMPermission[]]$InputObject,
@@ -163,7 +183,7 @@ Function New-FMPathPermission {
       [String[]]$Identity,
       [Parameter(ParameterSetName = 'Default')]
       [ValidateNotNullOrEmpty()]
-      [System.Security.AccessControl.FileSystemRights[]]$Permission,
+      [FileRights[]]$Permission,
       [Parameter(ParameterSetName = 'Default')]
       [ValidateNotNullOrEmpty()]
       [IMInheritance[]]$Inheritance
@@ -177,13 +197,6 @@ Function New-FMPathPermission {
       If (($Identity.Count -ne $Permission.Count) -or ($Identity.Count -ne $Inheritance.Count)) {
          Throw "Counts of identities, permissions and inheritances don't match - please check"
       }
-      <#
-      if ($Identity.Count -eq 1) {
-         $InputObject = New-FMPermission -Identity $Identity -Permission $Permission -Inheritance $Inheritance
-      }
-      else {
-         #>
-      #create permission array
       $TempInput = @()
       for ($i = 0; $i -lt $Identity.count; $i++) {
          $TempInput += New-FMPermission -Identity $Identity[$i] -Permission $Permission[$i] -Inheritance $Inheritance[$i]
@@ -243,5 +256,5 @@ Function New-FMDirectory {
       [FMPathPermission]$Root,
       [FMPathPermission[]]$Child
    )
-   [FMDirectory]::New($Root,$Child)
+   [FMDirectory]::New($Root, $Child)
 }

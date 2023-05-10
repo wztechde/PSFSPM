@@ -1,0 +1,64 @@
+@startuml FMPermission
+Enum FileRights {
+   ListDirectory 1
+   ListDirectory = 1
+   ReadData = 1
+   WriteData = 2
+   CreateFiles = 2
+   CreateDirectories = 4
+   AppendData = 4
+   ReadExtendedAttributes = 8
+   WriteExtendedAttributes = 16
+   Traverse = 32
+   ExecuteFile = 32
+   DeleteSubdirectoriesAndFiles = 64
+   ReadAttributes = 128
+   WriteAttributes = 256
+   Write = 278
+   **Delete = 65536**
+   ReadPermissions = 131072
+   Read = 131209
+   ReadAndExecute = 131241
+   Modify = 197055
+   ChangePermissions = 262144
+   TakeOwnership = 524288
+   Synchronize = 1048576
+   FullControl = 2032127
+}
+
+Enum IMInheritancre {
+   ThisFolderSubfoldersAndFiles
+   ThisFolderAndSubfolders
+   ThisFolderOnly
+   ThisFolderAndFiles
+   SubfoldersAndFilesOnly
+   SubfoldersOnly
+   FilesOnly
+   File
+}
+
+Class FMPermission{
+   Identity : string
+   Permission : FileRights
+   Inheritance : IMInheritance
+   Get_ExplicitInheritance() : HashTable
+   Get_FileSystemAccessRule() : System.Security.AccessControl.FileSystemAccessRule
+}
+
+Class FMPathPermission {
+   Path : String
+   Permission : FMPermission[]
+   ACRule : HashTable
+   Set_Rights() : PSCustomObject
+   Get_FileSystemAccessRule() : System.Security.AccessControl.FileSystemAccessRule[]
+}
+
+Class FMDirectory {
+   Root : FMPathPermission
+   Child : FMPathPermission[]
+   Get_XML() : XML
+   Set_FromXML()
+   Get_JSON() : JSON
+   Set_FromJSON()
+}
+@endum

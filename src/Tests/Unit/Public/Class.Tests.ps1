@@ -21,14 +21,39 @@ Describe 'Class-Tests' -Tag Unit {
         (New-FMPermission -ide 'foo' -perm 'Modify' -inh 'ThisFolderOnly').GetType() | Should -Be 'FMPermission'
       }
    }#end Context
-   Context 'Class FMPermission - helper function' -Tag Unit {
+   Context 'Class FMPermission - method Get_ExplicitInheritance' -Tag Unit {
       It 'checks for members of returned object' {
          $result = New-FMPermission -Identity 'foo' -Permission 'Modify' -Inheritance 'ThisFolderOnly'
          $result.Identity | Should -Be 'foo'
          $result.Permission | Should -Be 'Modify'
          $result.Inheritance | Should -Be 'ThisFolderOnly'
-         $result.GetInheritance().Propagate | Should -Be 'None'
-         $result.GetInheritance().Inherit | Should -Be 'None'
+         $result.Get_ExplicitInheritance().Propagate | Should -Be 'None'
+         $result.Get_ExplicitInheritance().Inherit | Should -Be 'None'
+      }
+   }#end context
+   Context "Class FMPermission - method Get_FileSystemAccessRule" -Tag Unit {
+      BeforeAll {
+         $FMP1 = New-FMPermission -Identity foo -Permission Write -Inheritance ThisFolderAndFiles
+         $FMP2 = New-FMPermission -Identity bar -Permission Read -Inheritance ThisFolderOnly
+      }
+      It "checks, that method is accessible" {
+         { $FMP1.Get_FileSystemAccessRule() } | Should -Not -Throw
+      }
+      It "checks for correct object being returned FMP1" {
+         $result = $FMP1.Get_FileSystemAccessRule()
+         $result.count | Should -Be 1
+         $result.FileSystemRights | Should -Be "Write, Synchronize"
+         $result.IdentityReference | Should -Be "foo"
+         $result.InheritanceFlags | Should -Be "ObjectInherit"
+         $result.PropagationFlags | Should -Be "None"
+      }
+      It "checks for correct object being returned FMP2" {
+         $result = $FMP2.Get_FileSystemAccessRule()
+         $result.count | Should -Be 1
+         $result.FileSystemRights | Should -Be "Read, Synchronize"
+         $result.IdentityReference | Should -Be "bar"
+         $result.InheritanceFlags | Should -Be "None"
+         $result.PropagationFlags | Should -Be "None"
       }
    }#end context
    Context "Class FMPathPermission" -Tag Unit {
@@ -39,7 +64,7 @@ Describe 'Class-Tests' -Tag Unit {
          (New-FMPathPermission -Path C:\Temp -InputObject (New-FMPermission -Id 'foo' -Perm 'Modify' -Inh 'ThisFolderOnly')).Gettype() | Should -Be 'FMPathPermission'
       }
    }#end Context
-   Context 'Class FMPathPermission - helper function - paramset [InputObject]' -Tag Unit {
+   Context 'Class FMPathPermission - paramset [InputObject]' -Tag Unit {
       It "checks correct object being returned - one FMPermission" {
          $Permission = New-FMPermission -Id 'foo' -Perm 'Modify' -Inh 'ThisFolderOnly'
          $result = New-FMPathPermission -Path C:\Temp -InputObject $Permission
@@ -50,17 +75,20 @@ Describe 'Class-Tests' -Tag Unit {
          $result.Permission.Inheritance | Should -Be "ThisFolderOnly"
       }
       It "checks correct object being returned - two FMPermission" {
-         $Permission = (New-FMPermission -Id 'foo' -Perm 'Modify' -Inh 'ThisFolderOnly'),
-         (New-FMPermission -Id 'bar' -Perm 'Write' -Inh 'ThisFolderSubfoldersAndFiles')
-         $result = New-FMPathPermission -Path C:\Temp -InputObject $Permission
+         $pm1 = New-FMPermission -Id 'foo' -Perm 'Modify' -Inh 'ThisFolderOnly'
+         $pm2 = New-FMPermission -Id 'bar' -Perm 'Read' -Inh 'File'
+         $result = New-FMPathPermission -Path C:\Temp -InputObject $pm1, $pm2
          $result.Path | Should -Be "C:\Temp"
          $result.Permission.Count | Should -be 2
-         $result.Permission.Identity | Should -Be ('foo', 'bar')
-         $result.Permission.Permission | Should -Be ('Modify', 'Write')
-         $result.Permission.Inheritance | Should -Be ("ThisFolderOnly", "ThisFolderSubfoldersAndFiles")
+         $result.Permission[0].Identity | Should -Be "foo"
+         $result.Permission[0].Permission | Should -Be "Modify"
+         $result.Permission[0].Inheritance | Should -Be "ThisFolderOnly"
+         $result.Permission[1].Identity | Should -Be "bar"
+         $result.Permission[1].Permission | Should -Be "Read"
+         $result.Permission[1].Inheritance | Should -Be "File"
       }
    }#end context
-   Context 'Class FMPathPermission - helper function - paramset [Default]' -Tag Unit {
+   Context 'Class FMPathPermission - paramset [Default]' -Tag Unit {
       It "verify that helper funtion parameterset 'default' exists" {
          { New-FMPathPermission -Path C:\Temp -Identity 'foo' -Permission 'Write' -Inheritance 'ThisFolderOnly' }  | Should -Not -Throw
       }
@@ -75,17 +103,6 @@ Describe 'Class-Tests' -Tag Unit {
          $result.Permission.Permission | Should -Be "Write"
          $result.Permission.Inheritance | Should -Be "ThisFolderOnly"
       }
-      It 'checks for correct object being returned - two path' {
-         $Result = New-FMPathPermission -Path C:\Temp, D:\Temp -Identity foo -Permission Write -Inheritance ThisFolderOnly
-         $result.Path | Should -Be ('C:\Temp', 'D:\Temp')
-         $result.Permission.Count | Should -be 1
-         $result.Permission.Identity | Should -Be "foo"
-         $result.Permission.Permission | Should -Be "Write"
-         $result.Permission.Inheritance | Should -Be "ThisFolderOnly"
-      }
-      It "Should fail if parameter counts don't match" {
-         { New-FMPathPermission -Path C:\Temp, D:\Temp -Identity foo -Permission Write, Read -Inheritance ThisFolderOnly } | Should -Throw "Counts of identities*"
-      }
       It "checks for correct object being returned - two permissions" {
          $Result = New-FMPathPermission -Path C:\Temp -Identity foo, bar -Permission Write, Read -Inheritance ThisFolderAndFiles, ThisFolderOnly
          $Result.Permission.Count | Should -be 2
@@ -93,52 +110,62 @@ Describe 'Class-Tests' -Tag Unit {
          $result.Permission.Permission | Should -Be ('Write', 'Read')
          $result.Permission.Inheritance | Should -Be ("ThisFolderAndFiles", "ThisFolderOnly")
       }
-      It "checks for correct object being returned - two permissions, two paths" {
-         $Result = New-FMPathPermission -Path C:\Temp, D:\Temp -Identity foo, bar -Permission Write, Read -Inheritance ThisFolderAndFiles, ThisFolderOnly
-         $Result.Permission.Count | Should -be 2
-         $result.Permission.Identity | Should -Be ('foo', 'bar')
-         $result.Permission.Permission | Should -Be ('Write', 'Read')
-         $result.Permission.Inheritance | Should -Be ("ThisFolderAndFiles", "ThisFolderOnly")
-      }
    }#end context
-   Context "Class FMPathPermission - method GFSAR" -Tag Unit {
-      BeforeAll {
-         $FMPP1 = New-FMPathPermission -Path C:\Temp -Identity foo -Permission Write -Inheritance ThisFolderAndFiles
-         $FMPP2 = New-FMPathPermission -Path C:\Temp -Identity bar -Permission Read -Inheritance ThisFolderOnly
-         $FMPP3 = New-FMPathPermission -Path C:\Temp -Identity foo, bar -Permission Write, Read -Inheritance ThisFolderAndFiles, SubfoldersOnly
+   Context 'Class FMPathPermission - method Get_FileSystemAccessRule' -Tag Unit {
+      It 'checks that method is available' {
+         $FMPP = New-FMPathPermission -Path C:\Temp -Identity 'foo' -Permission 'Write' -Inheritance 'ThisFolderOnly'
+         { $FMPP.Get_FileSystemAccessRule() } | Should -Not -Throw
       }
-      It "checks, that method is accessible" {
-         { $FMPP1.GetFileSystemAccessRule() } | Should -Not -Throw
-      }
-      It "checks for correct object being returned FMPP1" {
-         $result = $FMPP1.GetFileSystemAccessRule()
+
+      It 'Checks for correct result with one permission object' {
+         $FMPP = New-FMPathPermission -Path C:\Temp -Identity 'foo' -Permission 'Write' -Inheritance 'ThisFolderOnly'
+         $result = $FMPP.Get_FileSystemAccessRule()
          $result.count | Should -Be 1
-         $result.FileSystemRights | Should -Be "Write, Synchronize"
+         $result.FilesystemRights | Should -be "Write, Synchronize"
          $result.IdentityReference | Should -Be "foo"
-         $result.InheritanceFlags | Should -Be "ObjectInherit"
-         $result.PropagationFlags | Should -Be "None"
-      }
-      It "checks for correct object being returned FMPP2" {
-         $result = $FMPP2.GetFileSystemAccessRule()
-         $result.count | Should -Be 1
-         $result.FileSystemRights | Should -Be "Read, Synchronize"
-         $result.IdentityReference | Should -Be "bar"
          $result.InheritanceFlags | Should -Be "None"
          $result.PropagationFlags | Should -Be "None"
       }
-      It "checks for correct object being returned FMPP3 (2 Permissions on path)" {
-         $result = $FMPP3.GetFileSystemAccessRule()
-         $result.Count | Should -Be 2
-         $result[0].FileSystemRights | Should -Be "Write, Synchronize"
+      It 'Checks for correct result with one permission object' {
+         $FMPP = New-FMPathPermission -Path C:\Temp -Identity 'foo', 'bar' -Permission 'Write', 'read' -Inheritance 'ThisFolderOnly', 'FilesOnly'
+         $result = $FMPP.Get_FileSystemAccessRule()
+         $result.count | Should -Be 2
+         $result[0].FilesystemRights | Should -be "Write, Synchronize"
          $result[0].IdentityReference | Should -Be "foo"
-         $result[0].InheritanceFlags | Should -Be "ObjectInherit"
+         $result[0].InheritanceFlags | Should -Be "None"
          $result[0].PropagationFlags | Should -Be "None"
-         $result[1].FileSystemRights | Should -Be "Read, Synchronize"
+         $result[1].FilesystemRights | Should -be "Read, Synchronize"
          $result[1].IdentityReference | Should -Be "bar"
-         $result[1].InheritanceFlags | Should -Be "ContainerInherit"
+         $result[1].InheritanceFlags | Should -Be "ObjectInherit"
          $result[1].PropagationFlags | Should -Be "InheritOnly"
       }
-   }#end context
+   }
+   Context 'Class FMPathPerimssion - method Set_Access' -Tag Unit {
+      # prerequisites
+      BeforeAll {
+         New-LocalUser Pester1 -NoPassword
+         New-LocalGroup GPester1 -Description 'Pester Group 1'
+         Add-LocalGroupMember -Group GPester1 -Member Pester1
+         # Create folder strukture
+         $F_Foo = mkdir "$TestDrive\foo" -Force
+         $F_Bar = mkdir "$TestDrive\foo\bar" -Force
+         $F_Clara = mkdir "$TestDrive\foo\bar\clara" -Force
+      }
+
+      AfterAll {
+         Remove-LocalUser Pester1
+         Remove-LocalGroup Gpester1
+      }
+
+      It 'Should return correct object - test1' {
+         Mock Set-Acl { Get-Acl }
+         $FMPP = New-FMPathPermission -Path $Testdrive -Identity pester1 -Permission 'Write' -Inheritance 'ThisFolderOnly'
+         $result = $FMPP.Set_Access()
+         $ID = $result.Access | Where-Object { $_.IdentityReference -match 'pester1'}
+         $ID.FileSystemRights | Should -Be 'Write, Synchronize'
+         $ID.AccessControlType | Should -Be 'Allow'
+      }
+   }
    Context "Class FMDirectory" -Tag Unit {
       BeforeAll {
          $Root = New-FMPathPermission -Path C:\Temp -Identity foo -Permission Write -Inheritance ThisFolderAndFiles
@@ -161,15 +188,15 @@ Describe 'Class-Tests' -Tag Unit {
       }
       It "return full child path - check for method existing" {
          $Child2 = New-FMPathPermission -Path bar -Identity foo -Permission Write -Inheritance ThisFolderAndFiles
-         $TestDir=New-FMDirectory -Root $Root -Child $Child1, $Child2
+         $TestDir = New-FMDirectory -Root $Root -Child $Child1, $Child2
          { $TestDir.GetChildFullname(0) } | Should -Not -Throw "Method invocation fail*"
       }
       It "return full child path - check for correct information being returned" {
          $Child2 = New-FMPathPermission -Path bar -Identity foo -Permission Write -Inheritance ThisFolderAndFiles
-         $TestDir=New-FMDirectory -Root $Root -Child $Child1, $Child2
-         $result=$TestDir.GetChildFullname(0)
+         $TestDir = New-FMDirectory -Root $Root -Child $Child1, $Child2
+         $result = $TestDir.GetChildFullname(0)
          $result | Should -Be "C:\Temp\Foo"
-         $result=$TestDir.GetChildFullname(1)
+         $result = $TestDir.GetChildFullname(1)
          $result | Should -Be "C:\Temp\bar"
       }
    }

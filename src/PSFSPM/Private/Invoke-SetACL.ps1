@@ -3,14 +3,20 @@ function Invoke-SetACL {
     param (
         [FMPathPermission]$InputObject
     )
-    $Output=@()
+    $Output = @()
     # check path prior to any activity
     If (-Not (Test-Path $InputObject.Path)) {
         Throw "Cannot find path " + [char]39 + "$($InputObject.Path)" + [char]39 + " because it does not exist"
     }
     # there are multiple paths possible
     Foreach ($Path in $InputObject.Path) {
-        
+        $ACL = Get-Acl $Path
+        foreach ($Permission in $InputObject.Permission) {
+            switch -Wildcard ($Permission.Permission) {
+                'Delete' { $ACL=PurgeAccessRules -Path $Path -InputObject $Permission -ACL $ACL}
+                Default { $ACL=AddAccess -Path $Path -InputObject $Permission -ACL $ACL}
+            }
+        }
         if ($PSCmdlet.ShouldProcess("$((Get-Date).TimeofDay) $Path", "Invoke-SetACL")) {
             Write-Verbose "$((Get-Date).TimeofDay) Set Access Rule Protection on $($Path)"
             Write-Debug "$((Get-Date).TimeofDay) isProtected: $($InputObject.ACRule.isProtected), preserveInheritance: $($InputObject.ACRule.preserveInheritance)"
@@ -18,11 +24,12 @@ function Invoke-SetACL {
             # better maintainable
             SetAccessRuleProtection -Path $Path -InputObject $InputObject
             Write-Verbose "$((Get-Date).TimeofDay) Add Access to Path $($Path)"
-            $Output+=SetAccess -Path $Path -InputObject $InputObject    #now process the permissions
+            $Output += SetAccess -Path $Path -InputObject $InputObject    #now process the permissions
         }
     }
-    $Output
 }
+$Output
+
 
 function SetAccessRuleProtection {
     param (
@@ -33,6 +40,13 @@ function SetAccessRuleProtection {
     $ACL.SetAccessRuleProtection($InputObject.ACRule.isProtected, $InputObject.ACRule.preserveInheritance) | Out-Null
     Set-Acl -Path $Path -AclObject $ACL | Out-Null
 }
+function AddAccess {
+    param (
+        [String]$Path,
+        [FMPermission]$Permission
+    )
+
+}
 function SetAccess {
     param (
         [String]$Path,
@@ -42,8 +56,7 @@ function SetAccess {
     # process all permissions
     ForEach ($Permission in $InputObject.Permission) {
         $UserID = New-Object System.Security.Principal.NTAccount $Permission.Identity
-        If ($Permission.Permission -like "Delete")
-        {
+        If ($Permission.Permission -like "Delete") {
             $Acl.PurgeAccessRules($UserID)
         }
         else {
@@ -86,5 +99,5 @@ You can use the method "PurgeAccessRules" to remove all right rules of a user or
 $acl = Get-Acl C:\MyFolder
 $usersid = New-Object System.Security.Principal.Ntaccount("DOMAIN\Group")
 $acl.PurgeAccessRules($usersid)
-$acl | Set-Acl C:\MyFolder
+$acl | Set-Acl C:\MyFo
 #>
