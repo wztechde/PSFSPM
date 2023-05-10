@@ -3,74 +3,88 @@ function Invoke-SetACL {
     param (
         [FMPathPermission]$InputObject
     )
+    $Output=@()
     # check path prior to any activity
     If (-Not (Test-Path $InputObject.Path)) {
         Throw "Cannot find path " + [char]39 + "$($InputObject.Path)" + [char]39 + " because it does not exist"
     }
     # there are multiple paths possible
     Foreach ($Path in $InputObject.Path) {
-        if ($PSCmdlet.ShouldProcess("$((Get-Date).TimeofDay) $Path", "Set-ACL")) {
-            Write-Verbose "$((Get-Date).TimeofDay) Set Access Rule Protection on $($InputObject.Path)"
+        
+        if ($PSCmdlet.ShouldProcess("$((Get-Date).TimeofDay) $Path", "Invoke-SetACL")) {
+            Write-Verbose "$((Get-Date).TimeofDay) Set Access Rule Protection on $($Path)"
             Write-Debug "$((Get-Date).TimeofDay) isProtected: $($InputObject.ACRule.isProtected), preserveInheritance: $($InputObject.ACRule.preserveInheritance)"
-            SetAccessRuleProtection -InputObject $InputObject -Path $Path
-            AddAccess -Path $Path -InputObject $InputObject    #now process the permissions
+            # you don't need the complete object for the subroutines, but this wait it's easier and
+            # better maintainable
+            SetAccessRuleProtection -Path $Path -InputObject $InputObject
+            Write-Verbose "$((Get-Date).TimeofDay) Add Access to Path $($Path)"
+            $Output+=SetAccess -Path $Path -InputObject $InputObject    #now process the permissions
         }
     }
-
+    $Output
 }
 
 function SetAccessRuleProtection {
     param (
-        [FMPathPermission]$InputObject,
-        [String]$Path
+        [String]$Path,
+        [FMPathPermission]$InputObject
     )
     $ACL = Get-Acl -Path $Path
     $ACL.SetAccessRuleProtection($InputObject.ACRule.isProtected, $InputObject.ACRule.preserveInheritance) | Out-Null
     Set-Acl -Path $Path -AclObject $ACL | Out-Null
-    #Get-Acl -Path $Path
 }
-<#
-function AddAccessRule {
-    param (
-        [System.Security.AccessControl.FileSystemSecurity]$ACL,
-        [System.Security.AccessControl.AccessRule]$AccessObject
-    )
-    $ACL.AddAccessRule($ACL, $AccessObject)
-    $ACL
-}
-#>
-
-function AddAccess {
-    [CmdletBinding(SupportsShouldProcess)]
+function SetAccess {
     param (
         [String]$Path,
         [FMPathPermission]$InputObject
     )
+    $ACL = Get-Acl -Path $Path
+    # process all permissions
     ForEach ($Permission in $InputObject.Permission) {
-        $ACL = Get-Acl -Path $Path
-        $AccessObject =
-        New-Object System.Security.AccessControl.FileSystemAccessRule(
-            $Permission.Identity,
-            $Permission.Permission,
+        $UserID = New-Object System.Security.Principal.NTAccount $Permission.Identity
+        If ($Permission.Permission -like "Delete")
+        {
+            $Acl.PurgeAccessRules($UserID)
+        }
+        else {
+            $AccessObject =
+            New-Object System.Security.AccessControl.FileSystemAccessRule(
+                $UserID,
+                $Permission.Permission,
             ($Permission.GetInheritance()).Inherit,
             ($Permission.GetInheritance()).Propagate, "Allow")
-        Write-Verbose "Add $($Permission.Identity) to ACL, Permission: $($Permission.Permission), Inheritance: $($Permission.Inheritance)"
-        $ACL.AddAccessRule($AccessObject)
-        if ($PSCmdlet.ShouldProcess("$Path", "Add Access Rule")) {
-            Write-Verbose "AddAccessRule to $Path"
-            Set-Acl -Path $Path -AclObject $ACL | Out-Null
+            $ACL.AddAccessRule($AccessObject)
         }
     }
+    # and write back
+    Set-Acl -Path $Path -AclObject $ACL
 }
 
+function PurgeAccessRules {
+    param (
+        [String]$Path,
+        [FMPermission]$Permission
+    )
+    $ACL = Get-Acl $Path
+    $UserID = New-Object System.Security.Principal.NTAccount($Permission.Identity)
+    $ACL.PurgeAccessRules($UserID)
+    $ACL | Set-Acl -Path $Path
+}
 <#
 for each path
     1. SetAccessRuleProtection
     Set-ACL
-    for each permisison
-        1. Add Access Rule
-    Set-
+    for each
 
+#>
+<#After some tests, I'd say that there's no need to use an external module for this matter.
 
-    fdglghflHGKFHGKHFHFKHGFKDGGFDGFGFDGGFfdfff
+As you can read here: https://blog.netwrix.com/2018/04/18/how-to-manage-file-system-acls-with-powershell-scripts/
+
+You can use the method "PurgeAccessRules" to remove all right rules of a user or group. Code:
+
+$acl = Get-Acl C:\MyFolder
+$usersid = New-Object System.Security.Principal.Ntaccount("DOMAIN\Group")
+$acl.PurgeAccessRules($usersid)
+$acl | Set-Acl C:\MyFolder
 #>

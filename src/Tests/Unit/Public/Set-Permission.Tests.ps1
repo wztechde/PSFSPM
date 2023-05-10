@@ -12,14 +12,14 @@ Import-Module $PathToManifest -Force
 # Vars
 #-------------------------------------------------------------------------
 InModuleScope -ModuleName $ModuleName {
-   Describe 'Set-Permission1' -Tag Unit {
+   Describe 'Set-Permission' -Tag Unit {
       BeforeAll {
-         Mock AddAccess -MockWith { Get-ACL $TestDrive }
+         Mock SetAccess -MockWith { Get-ACL $TestDrive }
          $PermObject = New-FMPermission -Identity foo -Permission Read -Inheritance ThisFolderOnly
       }
       Context 'Function call' -Tag Unit {
          It 'Checks if function is available after module import' {
-            Mock AddAccess {}
+            Mock SetAccess {}
             { Set-Permission -Path $TestDrive -PermissionObject $PermObject } | Should -Not -Throw '*is not recognized as the name*'
          }#end it
          It 'Checks if help exists' {
@@ -140,14 +140,14 @@ InModuleScope -ModuleName $ModuleName {
             Set-Permission -PathPermissionObject $FMP
             Should -Invoke -CommandName SetAccessRuleProtection -Times 1
          }
-         It "checks if AddAccess is called " {
+         It "checks if SetAccess is called " {
             $DBG_SAVE=$DebugPreference
             $DebugPreference="Continue"
-            Mock -CommandName "AddAccess" {}
+            Mock -CommandName "SetAccess" {}
             Mock SetAccessRuleProtection { Get-ACL $testDrive }
             $FMP = New-FMPathPermission -Path $TestDrive -InputObject $PermObject
             Set-Permission -PathPermissionObject $FMP -verbose
-            Should -Invoke -CommandName AddAccess -Times 1
+            Should -Invoke -CommandName SetAccess -Times 1
             $DebugPreference=$DBG_SAVE
          }
          It "checks if Set-ACL is NOT called when '-Whatif' is given" {

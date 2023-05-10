@@ -9,11 +9,12 @@ if (Get-Module -Name $ModuleName -ErrorAction 'SilentlyContinue') {
 }
 Import-Module $PathToManifest -Force
 
-InModulescope -ModuleName $ModuleName {
+InModuleScope -ModuleName $ModuleName {
     BeforeAll {
         $PPM1 = New-FMPathPermission -Path $TestDrive -Identity 'foo', 'bar' -Permission Read, Write -Inheritance ThisFolderOnly, ThisFolderSubfoldersAndFiles
         $PPM2 = New-FMPathPermission -Path "$TestDrive\foo" -Identity 'foo', 'bar' -Permission Read, Write -Inheritance ThisFolderOnly, ThisFolderSubfoldersAndFiles
-        $PPM3 = New-FMPathPermission -Path $TestDrive,$TestDrive -Identity 'foo', 'bar' -Permission Read, Write -Inheritance ThisFolderOnly, ThisFolderSubfoldersAndFiles
+        $PPM3 = New-FMPathPermission -Path $TestDrive, $TestDrive -Identity 'foo', 'bar' -Permission Read, Write -Inheritance ThisFolderOnly, ThisFolderSubfoldersAndFiles
+        $PPM4 = New-FMPathPermission -Path "$TestDrive" -Identity 'foo', 'bar' -Permission Delete, Write -Inheritance ThisFolderOnly, ThisFolderSubfoldersAndFiles
     }
     Context "Check function parameter" {
         It "Should throw, if path doesn't exist" {
@@ -23,22 +24,30 @@ InModulescope -ModuleName $ModuleName {
     }#Context
     Context "Check inner function call" {
         It "Should call SetAccessRuleProtection - once" {
-            Mock SetAccessRuleProtection { Get-ACL $TestDrive }
-            Mock AddAccess { Get-ACL $TestDrive }
+            Mock SetAccessRuleProtection { Get-Acl $TestDrive }
+            Mock SetAccess { Get-Acl $TestDrive }
             Mock Set-ACL {}
             Invoke-setACL -InputObject $PPM1
             Should -Invoke SetAccessRuleProtection -Times 1
-            Should -Invoke AddAccess -Times 1
+            Should -Invoke SetAccess -Times 1
         }
         # The FMPathPermissionObjhect can hold more than one path to apply permissions to
         # Helps to easily assign a permission construct to a bunch of path (i.e. child in DirectoryObject)
-        It "Should call SetAccessRuleProtection - twice" {
-            Mock SetAccessRuleProtection { Get-ACL $TestDrive }
-            Mock AddAccess { Get-ACL $TestDrive }
+        It "Should call SetAccessRuleProtection - twice (two paths given)" {
+            Mock SetAccessRuleProtection { Get-Acl $TestDrive }
+            Mock SetAccess { Get-Acl $TestDrive }
             Mock Set-ACL {}
             Invoke-setACL -InputObject $PPM3
             Should -Invoke SetAccessRuleProtection -Times 2
-            Should -Invoke AddAccess -Times 2
+            Should -Invoke SetAccess -Times 2
+        }
+        It "Should call SetAccess" {
+            Mock SetAccessRuleProtection { Get-Acl $TestDrive }
+            Mock SetAccess { Get-Acl $TestDrive }
+            mock Set-ACL {}
+            $Result=Invoke-SetACL -InputObject $PPM4
+            Should -Invoke SetAccessRuleProtection -Times 2
+            Should -Invoke SetAccess -Times 2
         }
     }
 }
