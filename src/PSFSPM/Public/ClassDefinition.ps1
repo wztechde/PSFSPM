@@ -86,7 +86,7 @@ Class FMPermission {
 
    [System.Security.AccessControl.FileSystemAccessRule]Get_FileSystemAccessRule () {
       # mask out own permission(s) to avoid cast error
-      $TempPermission=$this.Permission
+      $TempPermission = $this.Permission
       if ($TempPermission -like "DeleteFromACL") {
          $TempPermission = "Delete"
       }
@@ -153,12 +153,24 @@ Class FMPathPermission {
             $ACL.PurgeAccessRules($UserID)
          }
          else {
-            $AccessObject =
-            New-Object System.Security.AccessControl.FileSystemAccessRule(
-               $UserID,
-               $Perm.Permission,
+            if ((Get-Item $this.path).PSIscontainer) {
+               $AccessObject =
+               New-Object System.Security.AccessControl.FileSystemAccessRule(
+                  $UserID,
+                  $Perm.Permission,
             ($Perm.Get_ExplicitInheritance()).Inherit,
             ($Perm.Get_ExplicitInheritance()).Propagate, "Allow")
+               $ACL.AddAccessRule($AccessObject)
+            }
+            else {
+               # remove propagation and inheritance for explicit files
+               $AccessObject =
+               New-Object System.Security.AccessControl.FileSystemAccessRule(
+                  $UserID,
+                  $Perm.Permission,
+                  'None',
+                  'None', "Allow")
+            }
             $ACL.AddAccessRule($AccessObject)
          }# end if
       }# end foreach

@@ -114,9 +114,9 @@ function Set-Permission {
          $TempFMPP = $PathPermissionObject
       }
       $TempFMPP | ForEach-Object {
-         #         if ($PSCmdlet.ShouldProcess("$($TempFMPP.Path)", 'Invoke-SetACL')) {
-         $output += Invoke-SetACL -InputObject $_
-         #         }
+         if ($PSCmdlet.ShouldProcess("$($TempFMPP.Path)", 'Set_Access')) {
+            $output += $_.Set_Access()
+         }
       }
    }
 
