@@ -174,7 +174,7 @@ Class FMPathPermission {
             $ACL.AddAccessRule($AccessObject)
          }# end if
       }# end foreach
-      $Output = Set-ACl -Path $this.Path -AclObject $ACL -Passthru
+      $Output = Set-Acl -Path $this.Path -AclObject $ACL -Passthru
       return $Output
    }# end method
 }#end class
@@ -227,20 +227,45 @@ Class FMDirectory {
       [FMPathPermission[]]$Child
    ) {
       $this.Root = $Root
-      $this.Root.ACRule.isProtected = $false
       # preserve inheritance must not be changed to keep the inherited acls
-      if ($($child.path) -match "^\w:\\") {
-         Throw "FMDirectory - children must not contain drive information"
+      $this.Root.ACRule.isProtected = $false
+      # check all children for possible full path errors
+      foreach ($cld in $child) {
+         if ($($cld.path) -match "^\w:\\") {
+            Throw "FMDirectory - children must not contain drive information $($cld.path)"
+         }
       }
       $this.Child = $Child
    }
 
-   [String]GetChildFullname(
+   [String]Get_ChildFullname(
       [int]$index
    ) {
       #INFO concatenates only string1 - there might be an issue with path(s) not existing
       return ("$($this.Root.Path)\$($this.Child[$index].path)")
    }
+   [PSCustomObject]Set_Access() {
+      # process root first
+      $ReturnRoot = ($this.Root).Set_Access()
+      $ReturnChild = @()
+      foreach ($cld in $this.Child) {
+         # concatenate hostname - changing $cld from enumeration directly results in changing the
+         # base object - a object.copy() might work, too
+         $Prm=@{
+            Path = Join-Path -Path ($this.Root).Path -ChildPath $cld.Path
+            InputObject = $cld.Permission
+         }
+         $TempChild=New-FMPathPermission @Prm
+         #$cld.Path = Join-Path -Path ($this.Root).Path -ChildPath $cld.Path
+         $ReturnChild += $TempChild.Set_Access()
+      }
+      $Output = [PSCustomObject]@{
+         Root  = $ReturnRoot
+         Child = $ReturnChild
+      }
+      return $Output
+   }
+
 }
 
 <#

@@ -56,9 +56,11 @@ Class FMPathPermission {
 Class FMDirectory {
    Root : FMPathPermission
    Child : FMPathPermission[]
+   Set_Rights() : PSCustomObject
+   Get_ChildFullname() : String
    Get_XML() : XML
    Set_FromXML()
    Get_JSON() : JSON
    Set_FromJSON()
 }
-@endum
+@enduml

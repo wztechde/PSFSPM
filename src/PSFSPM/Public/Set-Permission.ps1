@@ -59,11 +59,12 @@ function Set-Permission {
       [Parameter(Position = 0, Mandatory, ValueFromPipeline, ParameterSetName = 'Default')]
       [Parameter(Position = 0, Mandatory, ValueFromPipeline, ParameterSetName = 'PermissionObject')]
       [ValidateScript({
-            if (Test-Path $_) { $true }
-            else { Throw "Path $_ is not valid" }
+            if (-not(Test-Path $_ -PathType 'Container') -and -not(Test-Path $_ -PathType 'Leaf')) {
+               throw "$_ is not a valid file or folder path."
+            }
+            $true
          })]
-      [String[]]
-      $Path,
+      [string]$Path,
       # The identity(ies) to set permission for
       [Parameter(ParameterSetName = 'Default')]
       [Alias('Principal')]
@@ -100,7 +101,7 @@ function Set-Permission {
          Write-Verbose "$((Get-Date).TimeofDay) Parameterset: Default"
          $TempPermission = @()
          for ($i = 0; $i -lt $Identity.Count; $i++) {
-            $TempPermission += New-FMPermission -Identity $Identity[$i] -Permission $Permission[$i] -inheritance $Inheritance[$i]
+            $TempPermission += New-FMPermission -Identity $Identity[$i] -Permission $Permission[$i] -Inheritance $Inheritance[$i]
          }#end for
          $TempFMPP = New-FMPathPermission -Path $Path -InputObject $TempPermission
       }
@@ -114,7 +115,7 @@ function Set-Permission {
          $TempFMPP = $PathPermissionObject
       }
       $TempFMPP | ForEach-Object {
-         if ($PSCmdlet.ShouldProcess("$($TempFMPP.Path)", 'Set_Access')) {
+         if ($PSCmdlet.ShouldProcess("$_.Path)", 'Set_Access')) {
             $output += $_.Set_Access()
          }
       }

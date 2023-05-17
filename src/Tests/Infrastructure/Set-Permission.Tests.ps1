@@ -9,7 +9,7 @@ if (Get-Module -Name $ModuleName -ErrorAction 'SilentlyContinue') {
 }
 Import-Module $PathToManifest -Force
 
-Describe "Invoke-Setacl" -Tag Infrastructure {
+Describe "Set-Permission" -Tag Infrastructure {
     # prerequisites
     BeforeAll {
         New-LocalUser Pester1 -NoPassword
@@ -248,6 +248,7 @@ Describe "Invoke-Setacl" -Tag Infrastructure {
             $Access = (Get-ACL "$($FI_Bar.Fullname)\test_bar.txt").Access
             $Access.IdentityReference -match "Pester2" | Should -not -BeNullOrEmpty #not file
         }
+        It "Tests using"
 
     }
-}#Describe Get-ChilditemEnhanced
+}#Describe Set-Permission

@@ -60,5 +60,4 @@ Describe "Test class methods with impact" -Tag Infrastructure {
             $id=$result2.Access | Where-Object { $_.IdentityReference -match 'pester2' }
              $id | Should -BeNullOrEmpty
         }
-    }# end Context
-}# e
+    }# end
