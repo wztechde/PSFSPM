@@ -42,12 +42,12 @@ Describe 'Set-Permission Integration testing' -Tag Integration {
          $Result = Set-Permission -PathPermissionObject $FPM
          $CPath = "$F_Foo\Test"
          $ACLP = @{
-            fsr = 'FileSystemRights'
-            act = 'AccessControlType'
-            idr = 'IdentityReference'
-            ish = 'IsInherited'
-            ihf = 'InheritanceFlags'
-            ppf = 'PropagationFlags'
+            FileSysRgt = 'FileSystemRights'
+            AcsCtrlTyp = 'AccessControlType'
+            IDRef      = 'IdentityReference'
+            IsInh      = 'IsInherited'
+            InherFlgs  = 'InheritanceFlags'
+            PropgtFlgs = 'PropagationFlags'
          }
       }
       It "Checks for user <user> on <path> - should <is> member of acl" -ForEach @(
@@ -65,15 +65,15 @@ Describe 'Set-Permission Integration testing' -Tag Integration {
          }
       }# end it
       It "Checks on c:\tmp\<path> for flag <filterflag> on <filtervalue> - <flag> is <value>" -ForEach @(
-         @{path = ''; filterflag = 'idr'; filtervalue = 'pester1'; flag = 'ish'; value = $false }
-         @{path = ''; filterflag = 'idr'; filtervalue = 'pester1'; flag = 'fsr'; value = "Write, Synchronize" }
-         @{path = ''; filterflag = 'idr'; filtervalue = 'pester1'; flag = 'ihf'; value = "ContainerInherit, ObjectInherit" }
-         @{path = 'test.txt'; filterflag = 'idr'; filtervalue = 'pester1'; flag = 'ish'; value = $true }
-         @{path = 'test.txt'; filterflag = 'idr'; filtervalue = 'pester1'; flag = 'fsr'; value = "Write, Synchronize" }
-         @{path = 'test.txt'; filterflag = 'idr'; filtervalue = 'pester1'; flag = 'ihf'; value = "None" }
-         @{path = 'bar'; filterflag = 'idr'; filtervalue = 'pester1'; flag = 'ish'; value = $true }
-         @{path = 'bar'; filterflag = 'idr'; filtervalue = 'pester1'; flag = 'fsr'; value = "Write, Synchronize" }
-         @{path = 'bar'; filterflag = 'idr'; filtervalue = 'pester1'; flag = 'ihf'; value = "ContainerInherit, ObjectInherit" }
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'IsInh'; value = $false }
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'FileSysRgt'; value = "Write, Synchronize" }
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'InherFlgs'; value = "ContainerInherit, ObjectInherit" }
+         @{path = 'test.txt'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'IsInh'; value = $true }
+         @{path = 'test.txt'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'FileSysRgt'; value = "Write, Synchronize" }
+         @{path = 'test.txt'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'InherFlgs'; value = "None" }
+         @{path = 'bar'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'IsInh'; value = $true }
+         @{path = 'bar'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'FileSysRgt'; value = "Write, Synchronize" }
+         @{path = 'bar'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'InherFlgs'; value = "ContainerInherit, ObjectInherit" }
       ) {
          $CPath = Join-Path $Global:F_Foo -ChildPath $Path
          $ACL = Get-Acl $CPath
@@ -90,12 +90,12 @@ Describe 'Set-Permission Integration testing' -Tag Integration {
          $FPM = New-FMPathPermission -Path $F_Foo -Identity Pester1, Pester2 -Permission Read, Modify -Inheritance ThisFolderOnly, ThisFolderSubfoldersAndFiles
          $Result = Set-Permission -PathPermissionObject $FPM
          $ACLP = @{
-            fsr = 'FileSystemRights'
-            act = 'AccessControlType'
-            idr = 'IdentityReference'
-            ish = 'IsInherited'
-            ihf = 'InheritanceFlags'
-            ppf = 'PropagationFlags'
+            FileSysRgt = 'FileSystemRights'
+            AcsCtrlTyp = 'AccessControlType'
+            IDRef      = 'IdentityReference'
+            IsInh      = 'IsInherited'
+            InherFlgs  = 'InheritanceFlags'
+            PropgtFlgs = 'PropagationFlags'
          }
       }
       It "Checks for user <user> on <path> - should <is> member of acl" -ForEach @(
@@ -118,15 +118,15 @@ Describe 'Set-Permission Integration testing' -Tag Integration {
          }
       }# end it
       It "Checks on c:\tmp\<path> for flag <filterflag> on <filtervalue> - <flag> is <value>" -ForEach @(
-         @{path = ''; filterflag = 'idr'; filtervalue = 'pester1'; flag = 'ish'; value = $false }
-         @{path = ''; filterflag = 'idr'; filtervalue = 'pester1'; flag = 'fsr'; value = "Read, Synchronize" }
-         @{path = ''; filterflag = 'idr'; filtervalue = 'pester1'; flag = 'ihf'; value = "None" }
-         @{path = 'test.txt'; filterflag = 'idr'; filtervalue = 'pester2'; flag = 'ish'; value = $true }
-         @{path = 'test.txt'; filterflag = 'idr'; filtervalue = 'pester2'; flag = 'fsr'; value = "Modify, Synchronize" }
-         @{path = 'test.txt'; filterflag = 'idr'; filtervalue = 'pester2'; flag = 'ihf'; value = "None" }
-         @{path = 'bar'; filterflag = 'idr'; filtervalue = 'pester2'; flag = 'ish'; value = $true }
-         @{path = 'bar'; filterflag = 'idr'; filtervalue = 'pester2'; flag = 'fsr'; value = "Modify, Synchronize" }
-         @{path = 'bar'; filterflag = 'idr'; filtervalue = 'pester2'; flag = 'ihf'; value = "ContainerInherit, ObjectInherit" }
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'IsInh'; value = $false }
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'FileSysRgt'; value = "Read, Synchronize" }
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'InherFlgs'; value = "None" }
+         @{path = 'test.txt'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'IsInh'; value = $true }
+         @{path = 'test.txt'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'FileSysRgt'; value = "Modify, Synchronize" }
+         @{path = 'test.txt'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'InherFlgs'; value = "None" }
+         @{path = 'bar'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'IsInh'; value = $true }
+         @{path = 'bar'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'FileSysRgt'; value = "Modify, Synchronize" }
+         @{path = 'bar'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'InherFlgs'; value = "ContainerInherit, ObjectInherit" }
       ) {
          $CPath = Join-Path $Global:F_Foo -ChildPath $Path
          $ACL = Get-Acl $CPath
@@ -144,12 +144,12 @@ Describe 'Set-Permission Integration testing' -Tag Integration {
          $FPM = New-FMPathPermission -Path $F_Foo -Identity Pester1, Pester2, Pester3 -Permission Read, Modify, Write -Inheritance ThisFolderAndSubfolders, ThisFolderSubfoldersAndFiles, SubfoldersOnly
          $Result = Set-Permission -PathPermissionObject $FPM
          $ACLP = @{
-            fsr = 'FileSystemRights'
-            act = 'AccessControlType'
-            idr = 'IdentityReference'
-            ish = 'IsInherited'
-            ihf = 'InheritanceFlags'
-            ppf = 'PropagationFlags'
+            FileSysRgt = 'FileSystemRights'
+            AcsCtrlTyp = 'AccessControlType'
+            IDRef      = 'IdentityReference'
+            IsInh      = 'IsInherited'
+            InherFlgs  = 'InheritanceFlags'
+            PropgtFlgs = 'PropagationFlags'
          }
       }# end BeforeAll
       Context 'Base permissions' {
@@ -179,22 +179,52 @@ Describe 'Set-Permission Integration testing' -Tag Integration {
          }# end it
       }# end Context
       Context 'Deep folder checks' {
-         It "Checks on c:\tmp\<path> for flag <filterflag> on <filtervalue> - <flag> is <value>" -ForEach @(
-            @{path = ''; filterflag = 'idr'; filtervalue = 'pester1'; flag = 'ish'; value = $false }
-            @{path = ''; filterflag = 'idr'; filtervalue = 'pester1'; flag = 'fsr'; value = "Read, Synchronize" }
-            @{path = ''; filterflag = 'idr'; filtervalue = 'pester1'; flag = 'ihf'; value = "ContainerInherit" }
-            @{path = ''; filterflag = 'idr'; filtervalue = 'pester2'; flag = 'ish'; value = $false }
-            @{path = ''; filterflag = 'idr'; filtervalue = 'pester2'; flag = 'fsr'; value = "Modify, Synchronize" }
-            @{path = ''; filterflag = 'idr'; filtervalue = 'pester2'; flag = 'ihf'; value = "ContainerInherit, ObjectInherit" }
-            @{path = 'test.txt'; filterflag = 'idr'; filtervalue = 'pester2'; flag = 'ish'; value = $true }
-            @{path = 'test.txt'; filterflag = 'idr'; filtervalue = 'pester2'; flag = 'fsr'; value = "Modify, Synchronize" }
-            @{path = 'test.txt'; filterflag = 'idr'; filtervalue = 'pester2'; flag = 'ihf'; value = "None" }
-            @{path = 'bar'; filterflag = 'idr'; filtervalue = 'pester2'; flag = 'ish'; value = $true }
-            @{path = 'bar'; filterflag = 'idr'; filtervalue = 'pester2'; flag = 'fsr'; value = "Modify, Synchronize" }
-            @{path = 'bar'; filterflag = 'idr'; filtervalue = 'pester2'; flag = 'ihf'; value = "ContainerInherit, ObjectInherit" }
-            @{path = ''; filterflag = 'idr'; filtervalue = 'pester3'; flag = 'ish'; value = $false }
-            @{path = ''; filterflag = 'idr'; filtervalue = 'pester3'; flag = 'fsr'; value = "Write, Synchronize" }
-            @{path = ''; filterflag = 'idr'; filtervalue = 'pester3'; flag = 'ihf'; value = "ContainerInherit" }
+         It "Checks on <filtervalue> on flag `t<filterflag> `tc:\tmp\<path> `t <flag> is <value>" -ForEach @(
+            # pester1
+            @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'IsInh'; value = $false }
+            @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'FileSysRgt'; value = "Read, Synchronize" }
+            @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'InherFlgs'; value = "ContainerInherit" }
+            @{path = 'test.txt'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'IsInh'; value = $null }
+            @{path = 'test.txt'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'FileSysRgt'; value = $null }
+            @{path = 'test.txt'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'InherFlgs'; value = $null }
+            @{path = 'bar'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'IsInh'; value = $true }
+            @{path = 'bar'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'FileSysRgt'; value = "Read, Synchronize" }
+            @{path = 'bar'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'InherFlgs'; value = "ContainerInherit" }
+            @{path = 'bar\test.txt'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'IsInh'; value = $null }
+            @{path = 'bar\test.txt'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'FileSysRgt'; value = $null }
+            @{path = 'bar\test.txt'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'InherFlgs'; value = $null }
+            # pester2
+            @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'IsInh'; value = $false }
+            @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'FileSysRgt'; value = "Modify, Synchronize" }
+            @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'InherFlgs'; value = "ContainerInherit, ObjectInherit" }
+            @{path = 'test.txt'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'IsInh'; value = $true }
+            @{path = 'test.txt'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'FileSysRgt'; value = "Modify, Synchronize" }
+            @{path = 'test.txt'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'InherFlgs'; value = "None" }
+            @{path = 'bar'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'IsInh'; value = $true }
+            @{path = 'bar'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'FileSysRgt'; value = "Modify, Synchronize" }
+            @{path = 'bar'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'InherFlgs'; value = "ContainerInherit, ObjectInherit" }
+            @{path = 'bar\test.txt'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'IsInh'; value = $true }
+            @{path = 'bar\test.txt'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'FileSysRgt'; value = "Modify, Synchronize" }
+            @{path = 'bar\test.txt'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'InherFlgs'; value = "None" }
+            # pester3
+            @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'IsInh'; value = $false }
+            @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'FileSysRgt'; value = "Write, Synchronize" }
+            @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'InherFlgs'; value = "ContainerInherit" }
+            @{path = 'test.txt'; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'IsInh'; value = $null }
+            @{path = 'test.txt'; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'FileSysRgt'; value = $null }
+            @{path = 'test.txt'; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'InherFlgs'; value = $null }
+            @{path = 'bar'; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'IsInh'; value = $true }
+            @{path = 'bar'; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'FileSysRgt'; value = "Write, Synchronize" }
+            @{path = 'bar'; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'InherFlgs'; value = "ContainerInherit" }
+            @{path = 'bar\test.txt'; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'IsInh'; value = $null }
+            @{path = 'bar\test.txt'; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'FileSysRgt'; value = $null }
+            @{path = 'bar\test.txt'; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'InherFlgs'; value = $null }
+            @{path = 'bar\clara'; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'IsInh'; value = $true }
+            @{path = 'bar\clara'; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'FileSysRgt'; value = "Write, Synchronize" }
+            @{path = 'bar\clara'; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'InherFlgs'; value = "ContainerInherit" }
+            @{path = 'bar\clara\donna'; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'IsInh'; value = $true }
+            @{path = 'bar\clara\donna'; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'FileSysRgt'; value = "Write, Synchronize" }
+            @{path = 'bar\clara\donna'; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'InherFlgs'; value = "ContainerInherit" }
          ) {
             $CPath = Join-Path $Global:F_Foo -ChildPath $Path
             $ACL = Get-Acl $CPath
@@ -206,4 +236,175 @@ Describe 'Set-Permission Integration testing' -Tag Integration {
          }# end it
       }#end context
    }# end context
+}#end describe
+Describe "Test rights systematically File, FilesOnly, SubfoldersOnly" -Tag Integration {
+   BeforeAll {
+      CreateDirectories
+      $FPM = New-FMPathPermission -Path $F_Foo -Identity Pester1, Pester2, Pester3 -Permission Read, Modify, Write -Inheritance File,FilesOnly,SubfoldersOnly
+      $Result = Set-Permission -PathPermissionObject $FPM
+      $ACLP = @{
+         FileSysRgt = 'FileSystemRights'
+         AcsCtrlTyp = 'AccessControlType'
+         IDRef      = 'IdentityReference'
+         IsInh      = 'IsInherited'
+         InherFlgs  = 'InheritanceFlags'
+         PropgtFlgs = 'PropagationFlags'
+      }
+   }# end BeforeAll
+   Context "Permissions on files and folders" {
+      It "<user> on <path>. <is> member of acl" -ForEach @(
+         @{path = ''; user = 'pester1'; is = 'be' }
+         @{path = ''; user = 'pester2'; is = 'be' }
+         @{path = ''; user = 'pester3'; is = 'be' }
+         @{path = 'test.txt'; user = 'pester1' ; is = 'not be' }
+         @{path = 'test.txt'; user = 'pester2' ; is = 'be' }
+         @{path = 'test.txt'; user = 'pester3' ; is = 'not be' }
+         @{path = 'bar'; user = 'pester1' ; is = 'not be' }
+         @{path = 'bar'; user = 'pester2' ; is = 'be' }
+         @{path = 'bar'; user = 'pester3' ; is = 'be' }
+         @{path = 'bar\clara'; user = 'pester1' ; is = 'not be' }
+         @{path = 'bar\clara'; user = 'pester2' ; is = 'be' }
+         @{path = 'bar\clara'; user = 'pester3' ; is = 'be' }
+      ) {
+         $CPath = Join-Path $Global:F_Foo -ChildPath $Path
+         $ACL = Get-Acl $CPath
+         if ($is -eq 'be') {
+            $ACL.Access.IdentityReference -match $User | Should -Not -BeNullOrEmpty
+         }
+         else {
+            $ACL.Access.IdentityReference -match $User | Should -BeNullOrEmpty
+         }
+      }# end it
+   }# end Context
+   Context 'Deep folder checks' {
+      It "Checks on <filtervalue> on flag `t<filterflag> `tc:\tmp\<path> `t <flag> is <value>" -ForEach @(
+         # pester1
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'IsInh'; value = $false }
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'FileSysRgt'; value = "Read, Synchronize" }
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'InherFlgs'; value = "None" }
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'IsInh'; value = $false }
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'FileSysRgt'; value = "Modify, Synchronize" }
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'InherFlgs'; value = "ObjectInherit" }
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'IsInh'; value = $false }
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'FileSysRgt'; value = "Write, Synchronize" }
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'InherFlgs'; value = "ContainerInherit" }
+         @{path = '\test.txt'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'IsInh'; value = $true }
+         @{path = '\test.txt'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'FileSysRgt'; value = "Modify, Synchronize" }
+         @{path = '\test.txt'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'InherFlgs'; value = "None" }
+         @{path = '\bar'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'IsInh'; value = $true }
+         @{path = '\bar'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'FileSysRgt'; value = "Modify, Synchronize" }
+         @{path = '\bar'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'InherFlgs'; value = "ObjectInherit" }
+         @{path = '\bar'; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'IsInh'; value = $true }
+         @{path = '\bar'; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'FileSysRgt'; value = "Write, Synchronize" }
+         @{path = '\bar'; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'InherFlgs'; value = "ContainerInherit" }
+         @{path = '\bar\test.txt'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'IsInh'; value = $true }
+         @{path = '\bar\test.txt'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'FileSysRgt'; value = "Modify, Synchronize" }
+         @{path = '\bar\test.txt'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'InherFlgs'; value = "none" }
+         @{path = '\bar\clara'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'IsInh'; value = $true }
+         @{path = '\bar\clara'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'FileSysRgt'; value = "Modify, Synchronize" }
+         @{path = '\bar\clara'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'InherFlgs'; value = "ObjectInherit" }
+         @{path = '\bar\clara'; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'IsInh'; value = $true }
+         @{path = '\bar\clara'; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'FileSysRgt'; value = "Write, Synchronize" }
+         @{path = '\bar\clara'; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'InherFlgs'; value = "ContainerInherit" }
+      ) {
+         $CPath = Join-Path $Global:F_Foo -ChildPath $Path
+         $ACL = Get-Acl $CPath
+         # filter ouut ace
+         $filter = $ACLP.$($Filterflag)
+         $Filtered = $acl.access | Where-Object { $_.$filter -match $filtervalue }
+         $flg = $ACLP.$($flag)
+         $filtered.$($flg) | Should -Be $Value
+      }# end it
+   }#end context
+
+}# end
+Describe "Test rights systematically SubfoldersAndFilesOnly, ThisFolderAndFiles, ThisFolderOnly" -Tag Integration {
+   BeforeAll {
+      CreateDirectories
+      $FPM = New-FMPathPermission -Path $F_Foo -Identity Pester1, Pester2, Pester3 -Permission Read, Modify, Write -Inheritance SubfoldersAndFilesOnly, ThisFolderAndFiles, ThisFolderOnly
+      $Result = Set-Permission -PathPermissionObject $FPM
+      $ACLP = @{
+         FileSysRgt = 'FileSystemRights'
+         AcsCtrlTyp = 'AccessControlType'
+         IDRef      = 'IdentityReference'
+         IsInh      = 'IsInherited'
+         InherFlgs  = 'InheritanceFlags'
+         PropgtFlgs = 'PropagationFlags'
+      }
+   }# end BeforeAll
+   Context "Permissions on files and folders" {
+      It "<user> on <path>. <is> member of acl" -ForEach @(
+         @{path = ''; user = 'pester1'; is = 'be' }
+         @{path = ''; user = 'pester2'; is = 'be' }
+         @{path = ''; user = 'pester3'; is = 'be' }
+         @{path = 'test.txt'; user = 'pester1' ; is = 'be' }
+         @{path = 'test.txt'; user = 'pester2' ; is = 'be' }
+         @{path = 'test.txt'; user = 'pester3' ; is = 'not be' }
+         @{path = 'bar'; user = 'pester1' ; is = 'be' }
+         @{path = 'bar'; user = 'pester2' ; is = 'be' } #wegen der 'Files'
+         @{path = 'bar'; user = 'pester3' ; is = 'not be' }
+         @{path = 'bar\clara'; user = 'pester1' ; is = 'be' }
+         @{path = 'bar\clara'; user = 'pester2' ; is = 'be' } #wegen der files
+         @{path = 'bar\clara'; user = 'pester3' ; is = 'not be' }
+      ) {
+         $CPath = Join-Path $Global:F_Foo -ChildPath $Path
+         $ACL = Get-Acl $CPath
+         if ($is -eq 'be') {
+            $ACL.Access.IdentityReference -match $User | Should -Not -BeNullOrEmpty
+         }
+         else {
+            $ACL.Access.IdentityReference -match $User | Should -BeNullOrEmpty
+         }
+      }# end it
+   }# end Context
+   Context 'Deep folder checks' {
+      It "Checks on <filtervalue> on flag `t<filterflag> `tc:\tmp\<path> `t <flag> is <value>" -ForEach @(
+         # pester1
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'IsInh'; value = $false }
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'FileSysRgt'; value = "Read, Synchronize" }
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'InherFlgs'; value = "ContainerInherit, ObjectInherit" }
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'IsInh'; value = $false }
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'FileSysRgt'; value = "Modify, Synchronize" }
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'InherFlgs'; value = "ObjectInherit" }
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'IsInh'; value = $false }
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'FileSysRgt'; value = "Write, Synchronize" }
+         @{path = ''; filterflag = 'IDRef'; filtervalue = 'pester3'; flag = 'InherFlgs'; value = "None" }
+         # file permissions
+         @{path = 'test.txt'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'IsInh'; value = $true }
+         @{path = 'test.txt'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'FileSysRgt'; value = "Read, Synchronize" }
+         @{path = 'test.txt'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'InherFlgs'; value = "None" }
+         @{path = 'test.txt'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'IsInh'; value = $true }
+         @{path = 'test.txt'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'FileSysRgt'; value = "Modify, Synchronize" }
+         @{path = 'test.txt'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'InherFlgs'; value = "None" }
+         # subfolder
+         @{path = 'bar'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'IsInh'; value = $true }
+         @{path = 'bar'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'FileSysRgt'; value = "Read, Synchronize" }
+         @{path = 'bar'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'InherFlgs'; value = "ContainerInherit, ObjectInherit" }
+         @{path = 'bar'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'IsInh'; value = $true }
+         @{path = 'bar'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'FileSysRgt'; value = "Modify, Synchronize" }
+         @{path = 'bar'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'InherFlgs'; value = "ObjectInherit" }
+         # subfolder, file permissions
+         @{path = 'bar\test.txt'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'IsInh'; value = $true }
+         @{path = 'bar\test.txt'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'FileSysRgt'; value = "Read, Synchronize" }
+         @{path = 'bar\test.txt'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'InherFlgs'; value = "None" }
+         @{path = 'bar\test.txt'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'IsInh'; value = $true }
+         @{path = 'bar\test.txt'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'FileSysRgt'; value = "Modify, Synchronize" }
+         @{path = 'bar\test.txt'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'InherFlgs'; value = "None" }
+         # sub - subfolder
+         @{path = 'bar\clara'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'IsInh'; value = $true }
+         @{path = 'bar\clara'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'FileSysRgt'; value = "Read, Synchronize" }
+         @{path = 'bar\clara'; filterflag = 'IDRef'; filtervalue = 'pester1'; flag = 'InherFlgs'; value = "ContainerInherit, ObjectInherit" }
+         @{path = 'bar\clara'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'IsInh'; value = $true }
+         @{path = 'bar\clara'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'FileSysRgt'; value = "Modify, Synchronize" }
+         @{path = 'bar\clara'; filterflag = 'IDRef'; filtervalue = 'pester2'; flag = 'InherFlgs'; value = "ObjectInherit" }
+         ) {
+         $CPath = Join-Path $Global:F_Foo -ChildPath $Path
+         $ACL = Get-Acl $CPath
+         # filter ouut ace
+         $filter = $ACLP.$($Filterflag)
+         $Filtered = $acl.access | Where-Object { $_.$filter -match $filtervalue }
+         $flg = $ACLP.$($flag)
+         $filtered.$($flg) | Should -Be $Value
+      }# end it
+   }#end context
 }#end describe
