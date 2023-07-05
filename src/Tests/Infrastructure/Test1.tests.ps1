@@ -3,13 +3,8 @@ Function CreateDirs {
    MKdir "$Global:F_Foo\Foo" -force
    mkdir "$Global:F_Foo\Bas" -Force
 }
+
 Describe 'Voller Kram' {
-   BeforeDiscovery {
-      CreateDirs
-   }
-   BeforeAll {
-      
-   }
    Context "Neue Runde" {
       BeforeEach {
          CreateDirs
@@ -32,3 +27,5 @@ Describe 'Voller Kram' {
       }
    }
 }
+
+# write pester tests for Set-Permission using the classes from this module

@@ -152,8 +152,8 @@ Describe 'Class-Tests' -Tag Unit {
          $F_Clara = mkdir "$TestDrive\foo\bar\clara" -Force
       }
       AfterAll {
-         Remove-LocalUser Pester1
-         Remove-LocalGroup Gpester1
+         Remove-LocalUser Pester1 -ErrorAction SilentlyContinue
+         Remove-LocalGroup Gpester1 -ErrorAction SilentlyContinue
       }
       It 'Should return correct object - test1' {
          Mock Set-Acl { Get-Acl }

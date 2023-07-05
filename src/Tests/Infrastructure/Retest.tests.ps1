@@ -97,6 +97,7 @@ Describe 'Set-Permission Integration testing' -Tag Integration {
             InherFlgs  = 'InheritanceFlags'
             PropgtFlgs = 'PropagationFlags'
          }
+         $Data=Get-Content .\src\Tests\permission.json
       }
       It "Checks for user <user> on <path> - should <is> member of acl" -ForEach @(
          @{path = ''; user = 'pester1'; is = 'be' }

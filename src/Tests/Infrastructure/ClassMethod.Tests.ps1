@@ -61,3 +61,4 @@ Describe "Test class methods with impact" -Tag Infrastructure {
              $id | Should -BeNullOrEmpty
         }
     }# end
+}

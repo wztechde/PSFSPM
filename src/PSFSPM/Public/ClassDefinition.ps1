@@ -8,11 +8,11 @@ enum IMInheritance {
    FilesOnly
    File
 }
-
+# translate enum IMInheritance to System.Security.AccessControl.InheritanceFlags
 # The following enum is rebuilding the internal System.Security.AccessControl.FilesystemRights for extensability purposes
 # This way I'll be able to add additional "Rights" to the enum for my needs
 # Firstly I integrated the right delete, which will remove the given permission(s) completely from the ACL
-enum FileRights {
+enum FMFileRights {
    ListDirectory = 1
    ReadData = 1
    WriteData = 2
@@ -55,22 +55,22 @@ Class FMPermission {
    # A helper class to manage permissions
    [String]$Identity
    #[System.Security.AccessControl.FileSystemRights]$Permission
-   [FileRights]$Permission
+   [FMFileRights]$FileRight
    [IMInheritance]$Inheritance
 
    FMPermission(
       [String]$Identity,
-      [FileRights]$Permission,
+      [FMFileRights]$FileRight,
       [IMInheritance]$Inheritance
    ) {
       $this.Identity = $Identity
-      $this.Permission = $Permission
+      $this.FileRight = $FileRight
       $this.Inheritance = $Inheritance
    }
 
    #methods
    # https://community.spiceworks.com/topic/775372-powershell-to-change-permissions-on-fodlers
-   [hashtable]Get_ExplicitInheritance() {
+   [hashtable]GetDetailedInheritance() {
       $IMInheritanceConversionTable = @{
          [IMInheritance]::ThisFolderSubfoldersAndFiles = @{Propagate = 'None'; Inherit = 'ContainerInherit, ObjectInherit' };
          [IMInheritance]::ThisFolderAndSubfolders      = @{Propagate = 'None'; Inherit = 'ContainerInherit' };
@@ -102,20 +102,35 @@ Class FMPermission {
 }#end class
 
 # helper function to call constructor
+
+<#
+   .SYNOPSIS
+      New-FMPermission creates a FMPermission object  from the given identity, permission and inheritance
+   .DESCRIPTION
+      New-FMPermission takes a identity, permission and inheritance and creates a FMPermission object
+   .PARAMETER Identity
+      A string defining the identity to apply the permission to
+   .PARAMETER Permission
+      A string defining the permission to apply to the identity
+   .PARAMETER Inheritance
+      A string defining the inheritance to apply to the permission
+#>
 Function New-FMPermission {
    Param(
       [ValidateNotNullOrEmpty()]
       [String]$Identity,
       [ValidateNotNullOrEmpty()]
-      [FileRights]$Permission,
+      [FMFileRights]$FileRight,
       [ValidateNotNullOrEmpty()]
       [IMInheritance]$Inheritance
    )
-   [FMPermission]::New($Identity, $Permission, $Inheritance)
+   [FMPermission]::New($Identity, $FileRight, $Inheritance)
 }#end function
 
 <#
 FMPathPermission a path and an array of permissions to apply this path
+Describe the class fmPathPermission and its members in detail with examples on how to use them
+
 #>
 Class FMPathPermission {
    [String]$Path
@@ -180,6 +195,17 @@ Class FMPathPermission {
 }#end class
 
 #helper function to call constructor
+<#
+.SYNOPSIS
+   New-FMPathPermission creates a FMPathPermission object  from the given path and permission
+.DESCRIPTION
+   New-FMPathPermission takes a path and permission and creates a FMPathPermission object
+.PARAMETER Path
+   A string defining the path to apply the permission to
+.PARAMETER InputObject
+   One or more FMPermission object(s) defining the permission(s) to apply
+
+#>
 Function New-FMPathPermission {
    [CmdletBinding()]
    Param (
@@ -251,11 +277,11 @@ Class FMDirectory {
       foreach ($cld in $this.Child) {
          # concatenate hostname - changing $cld from enumeration directly results in changing the
          # base object - a object.copy() might work, too
-         $Prm=@{
-            Path = Join-Path -Path ($this.Root).Path -ChildPath $cld.Path
+         $Prm = @{
+            Path        = Join-Path -Path ($this.Root).Path -ChildPath $cld.Path
             InputObject = $cld.Permission
          }
-         $TempChild=New-FMPathPermission @Prm
+         $TempChild = New-FMPathPermission @Prm
          #$cld.Path = Join-Path -Path ($this.Root).Path -ChildPath $cld.Path
          $ReturnChild += $TempChild.Set_Access()
       }

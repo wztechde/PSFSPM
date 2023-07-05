@@ -1,0 +1,18 @@
+﻿{
+    "$schema":  "https://raw.githubusercontent.com/jdhitsolutions/PSProjectStatus/main/psproject.schema.json",
+    "Name":  "PSFSPM_NEW",
+    "Path":  "D:\\@Data\\nc-wztech.de\\@dev\\dev_powershell\\@project\\PSFSPM_NEW",
+    "LastUpdate":  "2023-06-29T17:50:56.1501971+02:00",
+    "Status":  "Development",
+    "ProjectVersion":  null,
+    "UpdateUser":  "SILENTBOB\\wzimmerm",
+    "Computername":  "SILENTBOB",
+    "RemoteRepository":  [
+
+                         ],
+    "Tasks":  [
+                  "document classes and helper scripts"
+              ],
+    "GitBranch":  "DeletePermission",
+    "Comment":  "Comment all classes in detail"
+}

@@ -248,7 +248,7 @@ Describe "Set-Permission" -Tag Infrastructure {
             $Access = (Get-ACL "$($FI_Bar.Fullname)\test_bar.txt").Access
             $Access.IdentityReference -match "Pester2" | Should -not -BeNullOrEmpty #not file
         }
-        It "Tests using"
-
+ 
     }
 }#Describe Set-Permission
+# analyze the files ClassDefinition.psnd Set-Permission.ps1 and write corresponding pester tests
