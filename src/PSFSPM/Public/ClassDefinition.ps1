@@ -84,16 +84,18 @@ Class FMPermission {
       return $IMInheritanceConversionTable[$this.Inheritance]
    }
 
-   [System.Security.AccessControl.FileSystemAccessRule]Get_FileSystemAccessRule () {
+   # returns a FileSystemAccessRule object for the current instance, not checking for correctness
+   [System.Security.AccessControl.FileSystemAccessRule]GetFileSystemAccessRule () {
       # mask out own permission(s) to avoid cast error
-      $TempPermission = $this.Permission
+      $TempPermission = $this.FileRight
       if ($TempPermission -like "DeleteFromACL") {
          $TempPermission = "Delete"
       }
+
       $TempPermission = $this.Identity,
       $TempPermission,
-      $this.Get_ExplicitInheritance().Inherit,
-      $this.Get_ExplicitInheritance().Propagate,
+      $this.GetDetailedInheritance().Inherit,
+      $this.GetDetailedInheritance().Propagate,
       [System.Security.AccessControl.AccessControlType]::Allow
       $Output = New-Object System.Security.AccessControl.FileSystemAccessRule $TempPermission
       return $Output

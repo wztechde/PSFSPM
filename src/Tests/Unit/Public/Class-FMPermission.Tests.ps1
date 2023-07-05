@@ -31,7 +31,7 @@ Describe 'FMPermission' -Tag Unit {
       }
    }#end context
    Context 'New-FMPermission - Test methods' {
-      Context 'method: GetDetailedInheritance' {
+      Context "method: 'GetDetailedInheritance'" {
          BeforeAll {
             $result = New-FMPermission -Identity 'test' -FileRight 'Read' -Inheritance 'ThisFolderOnly'
          }
@@ -59,5 +59,28 @@ Describe 'FMPermission' -Tag Unit {
             $rs1.Inherit | Should -Be $Inherit
          }
       }#end context
-   }#end context
-}#end desc
+      Context "method: 'GetFileSystemAccessRule'" {
+         BeforeAll {
+            $result = New-FMPermission -Identity 'test' -FileRight 'Read' -Inheritance 'ThisFolderOnly'
+         }
+         It 'Should return a FileSystemAccessRule object' {
+            $result.GetFileSystemAccessRule() | Should -BeOfType 'System.Security.AccessControl.FileSystemAccessRule'
+         }#end it
+         It "Object members should have correct values set for different inheritances - current <Inheritance>" -ForEach @(
+            @{Inheritance = 'ThisFolderSubfoldersAndFiles'; Propagate = 'None'; Inherit = 'ContainerInherit, ObjectInherit' },
+            @{Inheritance = 'ThisFolderAndSubfolders'; Propagate = 'None'; Inherit = 'ContainerInherit' },
+            @{Inheritance = 'ThisFolderOnly'; Propagate = 'None'; Inherit = 'None' },
+            @{Inheritance = 'ThisFolderAndFiles'; Propagate = 'None'; Inherit = 'ObjectInherit' },
+            @{Inheritance = 'SubfoldersAndFilesOnly'; Propagate = 'InheritOnly'; Inherit = 'ContainerInherit, ObjectInherit' },
+            @{Inheritance = 'SubfoldersOnly'; Propagate = 'InheritOnly'; Inherit = 'ContainerInherit' },
+            @{Inheritance = 'FilesOnly'; Propagate = 'InheritOnly'; Inherit = 'ObjectInherit' },
+            @{Inheritance = 'File'; Propagate = 'None'; Inherit = 'None' }
+         ) {
+            $result = New-FMPermission -Identity 'test' -FileRight 'Read' -Inheritance $Inheritance
+            $rs1 = $result.GetFileSystemAccessRule()
+            $($rs1.PropagationFlags) | Should -Be $Propagate
+            $($rs1.InheritanceFlags) | Should -Be $Inherit
+         }
+      }#end context
+   }#end contex
+}#end describe
