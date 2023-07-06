@@ -139,6 +139,7 @@ Class FMPathPermission {
    [FMPermission[]]$Permission
    [hashtable]$ACRule = @{
       # as standard break inheritance and copy existing acls
+      # use on $acl with .SetAccessRuleProtection($isprotected, $preserveInheritance)
       # see example 4: https://learn.microsoft.com/de-de/powershell/module/microsoft.powershell.security/set-acl?view=powershell-7.2
       isProtected         = $false
       preserveInheritance = $true
@@ -146,7 +147,7 @@ Class FMPathPermission {
 
    #constructor
    FMPathPermission(
-      [String[]]$Path,
+      [String]$Path,
       [FMPermission[]]$Permission
    ) {
       $this.Path = $Path
@@ -162,29 +163,29 @@ Class FMPathPermission {
       return $Output
    }
 
-   [System.Security.AccessControl.FileSystemSecurity]Set_Access() {
+   [System.Security.AccessControl.FileSystemSecurity]SetAccess() {
       $ACL = Get-Acl $this.Path
       foreach ($Perm in $this.Permission) {
+         # create security principal checks for existance of the identity, too
          $UserID = New-Object System.Security.Principal.NTAccount $Perm.Identity
-         If ($Perm.Permission -like "DeleteFromACL") {
+         If ($Perm.FileRight -like "DeleteFromACL") {
             $ACL.PurgeAccessRules($UserID)
          }
          else {
             if ((Get-Item $this.path).PSIscontainer) {
-               $AccessObject =
-               New-Object System.Security.AccessControl.FileSystemAccessRule(
+               $AccessObject = New-Object System.Security.AccessControl.FileSystemAccessRule(
                   $UserID,
-                  $Perm.Permission,
-            ($Perm.Get_ExplicitInheritance()).Inherit,
-            ($Perm.Get_ExplicitInheritance()).Propagate, "Allow")
+                  $Perm.FileRight,
+                  ($Perm.GetDetailedInheritance()).Inherit,
+                  ($Perm.GetDetailedInheritance()).Propagate, "Allow")
                $ACL.AddAccessRule($AccessObject)
             }
             else {
-               # remove propagation and inheritance for explicit files
+               # disable propagation and inheritance for explicit files
                $AccessObject =
                New-Object System.Security.AccessControl.FileSystemAccessRule(
                   $UserID,
-                  $Perm.Permission,
+                  $Perm.FileRight,
                   'None',
                   'None', "Allow")
             }
@@ -211,8 +212,6 @@ Class FMPathPermission {
 Function New-FMPathPermission {
    [CmdletBinding()]
    Param (
-      [Parameter(ParameterSetName = 'Default')]
-      [Parameter(ParameterSetName = 'InputObject')]
       [ValidateNotNullOrEmpty()]
       [String]$Path,
       [Parameter(ParameterSetName = 'InputObject')]
@@ -223,7 +222,7 @@ Function New-FMPathPermission {
       [String[]]$Identity,
       [Parameter(ParameterSetName = 'Default')]
       [ValidateNotNullOrEmpty()]
-      [FileRights[]]$Permission,
+      [FMFileRights[]]$FileRight,
       [Parameter(ParameterSetName = 'Default')]
       [ValidateNotNullOrEmpty()]
       [IMInheritance[]]$Inheritance
@@ -234,12 +233,12 @@ Function New-FMPathPermission {
    }
    # parameter set 'Default'
    if ($PSBoundParameters.ContainsKey('Identity')) {
-      If (($Identity.Count -ne $Permission.Count) -or ($Identity.Count -ne $Inheritance.Count)) {
+      If (($Identity.Count -ne $FileRight.Count) -or ($Identity.Count -ne $Inheritance.Count)) {
          Throw "Counts of identities, permissions and inheritances don't match - please check"
       }
       $TempInput = @()
       for ($i = 0; $i -lt $Identity.count; $i++) {
-         $TempInput += New-FMPermission -Identity $Identity[$i] -Permission $Permission[$i] -Inheritance $Inheritance[$i]
+         $TempInput += New-FMPermission -Identity $Identity[$i] -FileRight $FileRight[$i] -Inheritance $Inheritance[$i]
       }
       #}
       [FMPathPermission]::New($Path, $TempInput)
