@@ -168,6 +168,7 @@ Class FMPathPermission {
       foreach ($Perm in $this.Permission) {
          # create security principal checks for existance of the identity, too
          $UserID = New-Object System.Security.Principal.NTAccount $Perm.Identity
+         # filter out own 'permission' De
          If ($Perm.FileRight -like "DeleteFromACL") {
             $ACL.PurgeAccessRules($UserID)
          }

@@ -63,12 +63,19 @@ Describe 'FMPathPermission' -Tag Unit {
             $result = $FMPP3.SetAccess()
             $result | Should -ContainACE $FMPP4.Permission
          }#end it
-         It "Should return an ACL object" {
+         It "Should comtain ACE" {
+            $result = $FMPP2.SetAccess()
+            $result | Should -Not -ContainACE $FMPP1.Permission
+         }#end it
+         It "Should BeInACL" {
             $result = $FMPP2.SetAccess()
             #"Wolle" | Should -BeInACL "Werner"
-            $result | Should -Not -ContainACE $FMPP1.Permission
+            $FMPP2.Permission.GetFileSystemAccessRule() | Should -BeInACL $result
             #$result.Gettype() | Should -Be 'System.Security.AccessControl.DirectorySecurity'
          }#end it
       }#end context
    }#end context
-}#end describ
+   Context 'Test' {
+
+   }#end context
+}#end describe
