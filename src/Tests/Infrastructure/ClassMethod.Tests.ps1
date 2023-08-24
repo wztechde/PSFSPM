@@ -32,15 +32,15 @@ Describe "Test class methods with impact" -Tag Infrastructure {
 
     Context 'FMPathPermission - method Set_Access' {
         It 'Should add pester1 to ACL' {
-            $FMPP = New-FMPathPermission -Path $Testdrive -Identity pester1 -Permission 'Write' -Inheritance 'ThisFolderOnly'
-            $result = $FMPP.Set_Access()
+            $FMPP = New-FMPathPermission -Path $Testdrive -Identity pester1 -FileRight 'Write' -Inheritance 'ThisFolderOnly'
+            $result = $FMPP.SetAccess()
             $ID = $result.Access | Where-Object { $_.IdentityReference -match 'pester1' }
             $ID.FileSystemRights | Should -Be 'Write, Synchronize'
             $ID.AccessControlType | Should -Be 'Allow'
         }
         It 'Should add pester1 and pester2 to ACL' {
-            $FMPP = New-FMPathPermission -Path $Testdrive -Identity pester1, pester2 -Permission 'Write', 'Read' -Inheritance 'ThisFolderOnly', 'ThisFolderSubfoldersAndFiles'
-            $result = $FMPP.Set_Access()
+            $FMPP = New-FMPathPermission -Path $Testdrive -Identity pester1, pester2 -FileRight 'Write', 'Read' -Inheritance 'ThisFolderOnly', 'ThisFolderSubfoldersAndFiles'
+            $result = $FMPP.SetAccess()
             $ID = $result.Access | Where-Object { $_.IdentityReference -match 'pester1' }
             $ID.FileSystemRights | Should -Be 'Write, Synchronize'
             $ID.AccessControlType | Should -Be 'Allow'
@@ -53,10 +53,10 @@ Describe "Test class methods with impact" -Tag Infrastructure {
             $ID.PropagationFlags | Should -Be 'None'
         }
         It 'Should remove pester 2 from ACL' {
-            $FMPP = New-FMPathPermission -Path $Testdrive -Identity pester1, pester2 -Permission 'Write', 'Read' -Inheritance 'ThisFolderOnly', 'ThisFolderSubfoldersAndFiles'
-            $result = $FMPP.Set_Access()
-            $FMPP2 = New-FMPathPermission -Path $Testdrive -Identity pester2 -Permission 'DeleteFromACL' -Inheritance "ThisFolderOnly"
-            $result2 = $Fmpp2.Set_Access()
+            $FMPP = New-FMPathPermission -Path $Testdrive -Identity pester1, pester2 -FileRight 'Write', 'Read' -Inheritance 'ThisFolderOnly', 'ThisFolderSubfoldersAndFiles'
+            $result = $FMPP.SetAccess()
+            $FMPP2 = New-FMPathPermission -Path $Testdrive -Identity pester2 -FileRight 'DeleteFromACL' -Inheritance "ThisFolderOnly"
+            $result2 = $Fmpp2.SetAccess()
             $id=$result2.Access | Where-Object { $_.IdentityReference -match 'pester2' }
              $id | Should -BeNullOrEmpty
         }

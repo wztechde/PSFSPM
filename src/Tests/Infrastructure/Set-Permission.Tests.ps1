@@ -37,14 +37,14 @@ Describe "Set-Permission" -Tag Infrastructure {
         Add the new user and convert all inherited permissions to explicit permissions: SetAccessRuleProtection(True, True)
         #>
         It 'Should change acls to explicit' {
-            $FPM1 = New-FMPathPermission -Path $F_foo.FullName -Identity pester1 -Permission Read -Inheritance ThisFolderOnly
+            $FPM1 = New-FMPathPermission -Path $F_foo.FullName -Identity pester1 -FileRight Read -Inheritance ThisFolderOnly
             $BeforeACL = Get-Acl $F_Bar.FullName
             $result = Set-Permission -PathPermissionObject $FPM1
             $CurrentACL = Get-Acl $F_Bar.FullName
             $CurrentACL.Access[0].IsInherited | Should -Be $true
         }
         It 'Should remove all inherited acls' {
-            $FPM1 = New-FMPathPermission -Path $F_Clara.FullName -Identity pester1 -Permission Read -Inheritance ThisFolderSubfoldersAndFiles
+            $FPM1 = New-FMPathPermission -Path $F_Clara.FullName -Identity pester1 -FileRight Read -Inheritance ThisFolderSubfoldersAndFiles
             $BeforeACL = Get-Acl $F_Clara.FullName
             $FPM1.ACRule.isProtected = $false
             $result = Set-Permission -PathPermissionObject $FPM1
@@ -63,7 +63,7 @@ Describe "Set-Permission" -Tag Infrastructure {
             $param = @{
                 Path        = $FI_Bar
                 Identity    = @("Pester1", "Pester2")
-                Permission  = @("Read", "Write")
+                FileRight = @("Read", "Write")
                 Inheritance = @("ThisFolderOnly", "ThisFolderSubfoldersAndFiles")
             }
             $FPM1 = New-FMPathPermission @param
@@ -81,7 +81,7 @@ Describe "Set-Permission" -Tag Infrastructure {
             $param = @{
                 Path        = $FI_Bar
                 Identity    = @("Pester1", "Pester2", "Pester3")
-                Permission  = @("Read", "Write", "Full")
+                FileRight = @("Read", "Write", "Full")
                 Inheritance = @("ThisFolderOnly", "SubfoldersAndFilesOnly", "ThisFolderSubfoldersAndFiles")
             }
             $FPM1 = New-FMPathPermission @param
@@ -119,7 +119,7 @@ Describe "Set-Permission" -Tag Infrastructure {
             $param = @{
                 Path        = $FI_Foo
                 Identity    = @("Pester1")
-                Permission  = @("Write")
+                FileRight = @("Write")
                 Inheritance = @("ThisFolderSubFoldersAndFiles")
             }
             $FPM1 = New-FMPathPermission @param
@@ -139,7 +139,7 @@ Describe "Set-Permission" -Tag Infrastructure {
             $param = @{
                 Path        = $FI_bar
                 Identity    = @("Pester1")
-                Permission  = @("Write")
+                FileRight = @("Write")
                 Inheritance = @("ThisFolderAndSubFolders")
             }
             $FPM1 = New-FMPathPermission @param
@@ -159,7 +159,7 @@ Describe "Set-Permission" -Tag Infrastructure {
             $param = @{
                 Path        = $FI_Foo
                 Identity    = @("Pester1")
-                Permission  = @("Write")
+                FileRight = @("Write")
                 Inheritance = @("ThisFolderOnly")
             }
             $FPM1 = New-FMPathPermission @param
@@ -175,7 +175,7 @@ Describe "Set-Permission" -Tag Infrastructure {
             $param = @{
                 Path        = $FI_Bar
                 Identity    = @("Pester1")
-                Permission  = @("Write")
+                FileRight = @("Write")
                 Inheritance = @("ThisFolderAndFiles")
             }
             $FPM1 = New-FMPathPermission @param
@@ -201,7 +201,7 @@ Describe "Set-Permission" -Tag Infrastructure {
             $param = @{
                 Path        = $FI_Bar
                 Identity    = @("Pester1")
-                Permission  = @("Write")
+                FileRight = @("Write")
                 Inheritance = @("SubFoldersAndFilesOnly")
             }
             $FPM1 = New-FMPathPermission @param
@@ -218,7 +218,7 @@ Describe "Set-Permission" -Tag Infrastructure {
             $param = @{
                 Path        = $FI_Bar
                 Identity    = @("Pester2")
-                Permission  = @("Write")
+                FileRight = @("Write")
                 Inheritance = @("SubFoldersOnly")
             }
             $FPM1 = New-FMPathPermission @param
@@ -236,7 +236,7 @@ Describe "Set-Permission" -Tag Infrastructure {
             $param = @{
                 Path        = $FI_Bar
                 Identity    = @("Pester2")
-                Permission  = @("Write")
+                FileRight = @("Write")
                 Inheritance = @("FilesOnly")
             }
             $FPM1 = New-FMPathPermission @param
@@ -248,7 +248,7 @@ Describe "Set-Permission" -Tag Infrastructure {
             $Access = (Get-ACL "$($FI_Bar.Fullname)\test_bar.txt").Access
             $Access.IdentityReference -match "Pester2" | Should -not -BeNullOrEmpty #not file
         }
- 
+
     }
 }#Describe Set-Permission
 # analyze the files ClassDefinition.psnd Set-Permission.ps1 and write corresponding pester tests

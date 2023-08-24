@@ -6,7 +6,8 @@ BeforeAll {
    #-------------------------------------------------------------------------
    #if the module is already in memory, remove it
    Get-Module $ModuleName | Remove-Module -Force
-   $PathToManifest = [System.IO.Path]::Combine('..', '..', 'Artifacts', "$ModuleName.psd1")
+   $PathToManifest = [System.IO.Path]::Combine('..', '..', $ModuleName, "$ModuleName.psd1")
+   #$PathToManifest = [System.IO.Path]::Combine('..', '..', 'Artifacts', "$ModuleName.psd1")
    #-------------------------------------------------------------------------
    Import-Module $PathToManifest -Force
    #-------------------------------------------------------------------------

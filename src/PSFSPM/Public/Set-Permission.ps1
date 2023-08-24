@@ -71,7 +71,7 @@ function Set-Permission {
       [String[]]$Identity,
       # The permission(s) to set
       [Parameter(ParameterSetName = 'Default')]
-      [FileRights[]]$Permission,
+      [FMFileRights[]]$FileRight,
       # The inheritance(s) to set
       [Parameter(ParameterSetName = 'Default')]
       [IMInheritance[]]$Inheritance,
@@ -87,8 +87,8 @@ function Set-Permission {
 
    begin {
       #parameter checks
-      if ($PSBoundParameters.ContainsKey('Identity') -or $PSBoundParameters.ContainsKey('Permission') -or $PSBoundParameters.ContainsKey('Inheritance')) {
-         If (($Identity.Count -ne $Permission.Count) -or ($Identity.Count -ne $Inheritance.Count)) {
+      if ($PSBoundParameters.ContainsKey('Identity') -or $PSBoundParameters.ContainsKey('FileRight') -or $PSBoundParameters.ContainsKey('Inheritance')) {
+         If (($Identity.Count -ne $FileRight.Count) -or ($Identity.Count -ne $Inheritance.Count)) {
             Throw "Counts of identities, permissions and inheritances don't match - please check"
          }
       }
@@ -101,7 +101,7 @@ function Set-Permission {
          Write-Verbose "$((Get-Date).TimeofDay) Parameterset: Default"
          $TempPermission = @()
          for ($i = 0; $i -lt $Identity.Count; $i++) {
-            $TempPermission += New-FMPermission -Identity $Identity[$i] -Permission $Permission[$i] -Inheritance $Inheritance[$i]
+            $TempPermission += New-FMPermission -Identity $Identity[$i] -FileRight $FileRight[$i] -Inheritance $Inheritance[$i]
          }#end for
          $TempFMPP = New-FMPathPermission -Path $Path -InputObject $TempPermission
       }
@@ -116,7 +116,7 @@ function Set-Permission {
       }
       $TempFMPP | ForEach-Object {
          if ($PSCmdlet.ShouldProcess("$_.Path)", 'Set_Access')) {
-            $output += $_.Set_Access()
+            $output += $_.SetAccess()
          }
       }
    }

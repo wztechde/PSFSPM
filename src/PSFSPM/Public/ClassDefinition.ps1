@@ -303,6 +303,9 @@ Class FMDirectory {
          }
          $TempChild = New-FMPathPermission @Prm
          #$cld.Path = Join-Path -Path ($this.Root).Path -ChildPath $cld.Path
+         # children are always inheritance-breaking
+         $TempChild.ACRule.isProtected=$true
+         $TempChild.ACRule.preserveInheritance=$true
          $ReturnChild += $TempChild.SetAccess()
       }
       $Output = [PSCustomObject]@{
@@ -311,7 +314,6 @@ Class FMDirectory {
       }
       return $Output
    }
-
 }
 
 <#

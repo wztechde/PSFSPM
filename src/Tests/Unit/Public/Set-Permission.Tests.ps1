@@ -25,7 +25,7 @@ Describe 'Set-Permission' -Tag Unit {
       New-Item -Path $F_Foo -Name 'Testfile.txt' -ItemType File
       $F_Bar = mkdir "$TestDrive\foo\bar" -Force
       $F_Clara = mkdir "$TestDrive\foo\bar\clara" -Force
-      $Perm1 = New-FMPermission -Identity pester1 -Permission Read -Inheritance ThisFolderSubfoldersAndFiles
+      $Perm1 = New-FMPermission -Identity pester1 -FileRight Read -Inheritance ThisFolderSubfoldersAndFiles
    }# BeforeAll
 
    AfterAll {
@@ -58,11 +58,11 @@ Describe 'Set-Permission' -Tag Unit {
       It 'Can take several parameter(s) from pipeline' {
          { "$F_Foo\Testfile.txt" | Set-Permission -PermissionObject $Perm1 } | Should -Not -Throw
       }
-      It "Should throw if parameter doesn't fit expected type 'Permission'" {
-         { Set-Permission -Path $TestDrive -Identity foo -Permission ready -Inheritance NotGiven } | Should -Throw "Cannot process argument transformation on parameter 'Permission'*"
+      It "Should throw if parameter doesn't fit expected type 'FileRight'" {
+         { Set-Permission -Path $TestDrive -Identity foo -FileRight ready -Inheritance NotGiven -Verbose} | Should -Throw "Cannot process argument transformation on parameter 'FileRight'*"
       }
       It "Should throw if parameter doesn't fit expected type 'Inheritance'" {
-         { Set-Permission -Path $TestDrive -Identity foo -Permission read -Inheritance NotGiven } | Should -Throw "Cannot process argument transformation on parameter 'Inheritance'*"
+         { Set-Permission -Path $TestDrive -Identity foo -FileRight read -Inheritance NotGiven -Verbose } | Should -Throw "Cannot process argument transformation on parameter 'Inheritance'*"
       }
       It "Should throw if parameter doesn't fit expected type 'PermissionObject'" {
          { Set-Permission -Path $TestDrive -PermissionObject 'Willi' } | Should -Throw "Cannot process argument transformation on parameter 'PermissionObject'*"
@@ -81,13 +81,13 @@ Describe 'Set-Permission' -Tag Unit {
    }#end context param path
    Context 'Parameter check for default parameter set' -Tag Unit {
       It 'Check if parameter counts correlate' {
-         { Set-Permission -Path $TestDrive -Identity foo, bar -Permission 'Modify' -Inheritance 'ThisFolderSubfoldersAndFiles' } |
-         Should -Throw 'Counts of identities*'
+         { Set-Permission -Path $TestDrive -Identity foo,bar -FileRight 'Modify' -Inheritance 'ThisFolderSubfoldersAndFiles' } |
+            Should -Throw 'Counts of identities*'
       }
    }#end Context
    Context 'check inner parameter transformation to FMPathPermission' -Tag Unit {
       It 'Should return a FMPathPermission object, when fed with default data' {
-         $result = Set-Permission $Testdrive -Identity pester1 -Permission Read -Inheritance ThisFolderOnly -PassThru
+         $result = Set-Permission $Testdrive -Identity pester1 -FileRight 'Read' -Inheritance ThisFolderOnly -Passthru
          $result[0].gettype() | Should -Be 'FMPathPermission'
       }
       It 'Should return a FMPathPermission object, when fed with Permission' {
@@ -100,7 +100,7 @@ Describe 'Set-Permission' -Tag Unit {
          $result[0].gettype() | Should -Be 'FMPathPermission'
       }
       It "Paramset 'Default' - should return FMPP array when fed with multiple data" {
-         $result = Set-Permission $Testdrive -Identity pester1, pester2 -Permission Write, Read -Inheritance ThisFolderOnly, ThisFolderAndFiles -PassThru
+         $result = Set-Permission $Testdrive -Identity pester1, pester2 -FileRight 'Write','Read' -Inheritance ThisFolderOnly, ThisFolderAndFiles -PassThru
          $result[0].gettype() | Should -Be 'FMPathPermission'
          $result[0].Permission.Count | Should -Be 2
       }
