@@ -11,10 +11,10 @@ Import-Module $PathToManifest -Force
 
 InModuleScope -ModuleName $ModuleName {
     BeforeAll {
-        $PPM1 = New-FMPathPermission -Path $TestDrive -Identity 'foo', 'bar' -Permission Read, Write -Inheritance ThisFolderOnly, ThisFolderSubfoldersAndFiles
-        $PPM2 = New-FMPathPermission -Path "$TestDrive\foo" -Identity 'foo', 'bar' -Permission Read, Write -Inheritance ThisFolderOnly, ThisFolderSubfoldersAndFiles
-        $PPM3 = New-FMPathPermission -Path $TestDrive, $TestDrive -Identity 'foo', 'bar' -Permission Read, Write -Inheritance ThisFolderOnly, ThisFolderSubfoldersAndFiles
-        $PPM4 = New-FMPathPermission -Path "$TestDrive" -Identity 'foo', 'bar' -Permission Delete, Write -Inheritance ThisFolderOnly, ThisFolderSubfoldersAndFiles
+        $PPM1 = New-FMPathPermission -Path $TestDrive -Identity 'foo', 'bar' -FileRight Read, Write -Inheritance ThisFolderOnly, ThisFolderSubfoldersAndFiles
+        $PPM2 = New-FMPathPermission -Path "$TestDrive\foo" -Identity 'foo', 'bar' -FileRight Read, Write -Inheritance ThisFolderOnly, ThisFolderSubfoldersAndFiles
+        $PPM3 = New-FMPathPermission -Path $TestDrive -Identity 'foo', 'bar' -FileRight Read, Write -Inheritance ThisFolderOnly, ThisFolderSubfoldersAndFiles
+        $PPM4 = New-FMPathPermission -Path "$TestDrive" -Identity 'foo', 'bar' -FileRight Delete, Write -Inheritance ThisFolderOnly, ThisFolderSubfoldersAndFiles
     }
     Context "Check function parameter" {
         It "Should throw, if path doesn't exist" {
@@ -38,16 +38,16 @@ InModuleScope -ModuleName $ModuleName {
             Mock SetAccess { Get-Acl $TestDrive }
             Mock Set-ACL {}
             Invoke-setACL -InputObject $PPM3
-            Should -Invoke SetAccessRuleProtection -Times 2
-            Should -Invoke SetAccess -Times 2
+            Should -Invoke SetAccessRuleProtection -Times 1
+            Should -Invoke SetAccess -Times 1
         }
         It "Should call SetAccess" {
             Mock SetAccessRuleProtection { Get-Acl $TestDrive }
             Mock SetAccess { Get-Acl $TestDrive }
             mock Set-ACL {}
             $Result=Invoke-SetACL -InputObject $PPM4
-            Should -Invoke SetAccessRuleProtection -Times 2
-            Should -Invoke SetAccess -Times 2
+            Should -Invoke SetAccessRuleProtection -Times 1
+            Should -Invoke SetAccess -Times 1
         }
     }
 }

@@ -213,13 +213,13 @@ Describe 'Class-Tests' -Tag Unit {
          $ACLRoot = $ACL.Access | Where-Object { $_.IdentityReference -match "Pester2|Pester3" }
          ($ACLRoot.FileSystemRights) | Should -Be ("Read, Synchronize", "Write, Synchronize")
          ($ACLRoot.InheritanceFlags) | Should -Be ("ContainerInherit, ObjectInherit", "ContainerInherit, ObjectInherit")
-         ($ACLRoot.IsInherited) | Should -Be ("False", "False")
+         ($ACLRoot.IsInherited) | Should -Be ($False, $false)
          # check child
          $ACL = Get-Acl $F_Bar
          $ACLRoot = $ACL.Access | Where-Object { $_.IdentityReference -match "Pester2|Pester3" }
          ($ACLRoot.FileSystemRights) | Should -Be ("Read, Synchronize", "Write, Synchronize")
          ($ACLRoot.InheritanceFlags) | Should -Be ("ContainerInherit, ObjectInherit", "ContainerInherit, ObjectInherit")
-         ($ACLRoot.IsInherited) | Should -Be ("true", "true")
+         ($ACLRoot.IsInherited) | Should -Be ($false, $false)
          $ACLchild = $ACL.Access | Where-Object { $_.IdentityReference -match "Pester1" }
          ($ACLchild.FilesystemRights) | Should -Be "Read, Synchronize"
          ($ACLchild.InheritanceFlags) | Should -Be ("None")

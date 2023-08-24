@@ -45,7 +45,8 @@ function AddAccess {
         [String]$Path,
         [FMPermission]$Permission
     )
-
+    $Path | Out-Null
+    $Permission | Out-Null
 }
 function SetAccess {
     param (

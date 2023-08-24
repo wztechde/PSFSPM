@@ -67,10 +67,10 @@ Describe 'Class FMDirectory' -Tag Integration {
             Get-Acl -Path $Folder1_SF1 | Should -ContainACE $Cld2_PM
          }
          It "Checks for inherintance correctly set" {
-            ((Get-Acl -Path $Folder1).Access | Where {$_.IdentityReference -like "*pester1"}).IsInherited | Should -BeTrue
-            ((Get-Acl -Path $Folder1_sf2).Access | Where {$_.IdentityReference -like "*pester1"}).IsInherited | Should -BeTrue
+            ((Get-Acl -Path $Folder1).Access | Where-Object {$_.IdentityReference -like "*pester1"}).IsInherited | Should -BeTrue
+            ((Get-Acl -Path $Folder1_sf2).Access | Where-Object {$_.IdentityReference -like "*pester1"}).IsInherited | Should -BeTrue
             # subfolder breaks inheritance
-            ((Get-Acl -Path $Folder1_sf1).Access | Where {$_.IdentityReference -like "*pester1"}).IsInherited | Should -BeFalse
+            ((Get-Acl -Path $Folder1_sf1).Access | Where-Object {$_.IdentityReference -like "*pester1"}).IsInherited | Should -BeFalse
          }
       }
    }#end context
