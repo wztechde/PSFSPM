@@ -18,17 +18,17 @@
 
    Returns 'Succeeded, if there is no ACE in the ACL of C:\Temp matching the params given in $ACE
 #>
-Function Should-ContainACE ([System.Security.AccessControl.FileSystemSecurity]$ActualValue, $ExpectedValue, [Switch]$Negate) {
+Function Should-ContainACE ($ActualValue, $ExpectedValue, [Switch]$Negate) {
    $succeded = $true
    # filter out identity first
-   $Filtered = $ActualValue.Access | Where-Object { $_.IdentityReference -like $($ExpectedValue.Identity) }
+   $Filtered = $ActualValue.Access | Where-Object { $_.IdentityReference -like "*$($ExpectedValue.Identity)" }
    If ($null -eq $Filtered) {
       $failureMessage = "The identity $($ExpectedValue.Identity) not found ACL"
       $succeded = $false
    }
    else {
       #end if
-      if (($Filtered.FileSystemRights -match $ExpectedValue.FileRight).Count -eq 0) {
+      if (-not ($Filtered.FileSystemRights -match "^$($ExpectedValue.FileRight)")) {
          $failureMessage = "Expected [$($ExpectedValue.FileRight)], but only found [$($Filtered.FileSystemRights)]"
          $succeded = $false
       }#end if

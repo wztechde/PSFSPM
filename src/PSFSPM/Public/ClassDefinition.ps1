@@ -165,11 +165,21 @@ Class FMPathPermission {
 
    [System.Security.AccessControl.FileSystemSecurity]SetAccess() {
       $ACL = Get-Acl $this.Path
+      # set access rule protection
+      # $true,$false - remove all inherited
+      # $true,$true  - change all inherited to explicit
+      # $false,x     - inherit
+      $ACL.SetAccessRuleProtection($this.ACRule.isProtected, $this.ACRule.preserveInheritance)
+      $ACL | Set-Acl -Path $this.Path
+      $ACL = Get-Acl -Path $this.Path
       foreach ($Perm in $this.Permission) {
          # create security principal checks for existance of the identity, too
          $UserID = New-Object System.Security.Principal.NTAccount $Perm.Identity
          # filter out own 'permission' De
          If ($Perm.FileRight -like "DeleteFromACL") {
+            $ACL.SetAccessRuleProtection($true,$true)
+            Set-ACL $ACL -Path $this.Path
+            $ACL=Get-ACL $this.Path
             $ACL.PurgeAccessRules($UserID)
          }
          else {
@@ -190,7 +200,9 @@ Class FMPathPermission {
                   'None',
                   'None', "Allow")
             }
+            # access rule protection
             $ACL.AddAccessRule($AccessObject)
+            Set-Acl -Path $this.Path -AclObject $ACL
          }# end if
       }# end foreach
       $Output = Set-Acl -Path $this.Path -AclObject $ACL -Passthru
@@ -266,15 +278,18 @@ Class FMDirectory {
       $this.Child = $Child
    }
 
-   [String]Get_ChildFullname(
+   [String]GetChildFullname(
       [int]$index
    ) {
+      If ($index -gt ($this.Child).Count-1) {
+         Throw "Child index out of bounds"
+      }
       #INFO concatenates only string1 - there might be an issue with path(s) not existing
       return ("$($this.Root.Path)\$($this.Child[$index].path)")
    }
-   [PSCustomObject]Set_Access() {
+   [PSCustomObject]SetAccess() {
       # process root first
-      $ReturnRoot = ($this.Root).Set_Access()
+      $ReturnRoot = ($this.Root).SetAccess()
       $ReturnChild = @()
       foreach ($cld in $this.Child) {
          # concatenate hostname - changing $cld from enumeration directly results in changing the
@@ -283,9 +298,12 @@ Class FMDirectory {
             Path        = Join-Path -Path ($this.Root).Path -ChildPath $cld.Path
             InputObject = $cld.Permission
          }
+         if (-not (Test-Path $Prm.Path)) {
+            Throw "Child path doesn't exist: $($Prm.Path)"
+         }
          $TempChild = New-FMPathPermission @Prm
          #$cld.Path = Join-Path -Path ($this.Root).Path -ChildPath $cld.Path
-         $ReturnChild += $TempChild.Set_Access()
+         $ReturnChild += $TempChild.SetAccess()
       }
       $Output = [PSCustomObject]@{
          Root  = $ReturnRoot
