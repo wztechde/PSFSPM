@@ -85,7 +85,7 @@ Class FMPermission {
    }
 
    # returns a FileSystemAccessRule object for the current instance, not checking for correctness
-   [System.Security.AccessControl.FileSystemAccessRule]GetFileSystemAccessRule () {
+   [System.Security.AccessControl.FileSystemAccessRule]Get_FileSystemAccessRule () {
       # mask out own permission(s) to avoid cast error
       $TempPermission = $this.FileRight
       if ($TempPermission -like "DeleteFromACL") {
@@ -155,7 +155,7 @@ Class FMPathPermission {
    }
 
    # methods
-   [System.Security.AccessControl.FileSystemAccessRule[]]Get_FileSystemAccessRule () {
+   [System.Security.AccessControl.FileSystemAccessRule[]]Get_FileSystemAccessRule() {
       $Output = @()
       foreach ($Perm in $this.Permission) {
          $Output += $Perm.Get_FileSystemAccessRule()

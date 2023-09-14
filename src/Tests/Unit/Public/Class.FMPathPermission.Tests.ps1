@@ -36,4 +36,24 @@ Describe 'FMPathPermission' -Tag Unit {
          $result.Gettype() | Should -Be 'FMPathPermission'
       }#end it
    }#end context
+   Context 'New-FMPathPermission - Test methods' {
+      Context 'Get_FileSystemAccessRule' {
+         BeforeAll {
+            $PM1=New-FMPermission -Identity Pester1 -FileRight 'Modify' -Inheritance ThisFolderAndFiles
+            $PM2=New-FMPermission -Identity Pester1 -FileRight 'Modify' -Inheritance ThisFolderAndFiles
+            $FMPP1=New-FMPathPermission -Path C:\Temp -InputObject $PM1
+            $FMPP2=New-FMPathPermission -Path C:\Temp -InputObject $PM1,$PM2
+         }
+         It 'Should return the correct object' {
+            $FMPP1.Get_FileSystemAccessRule() | Should -BeOfType [System.Security.AccessControl.FileSystemAccessRule]
+         }
+         It 'Should return an array of FileSystemRight' {
+            $result=$FMPP2.Get_FileSystemAccessRule()
+            $result -is [array] | Should -BeTrue
+            $result.count | Should -be 2
+            $result[0] |Should -BeOfType [System.Security.AccessControl.FileSystemAccessRule]
+            $result[1] |Should -BeOfType [System.Security.AccessControl.FileSystemAccessRule]
+         }
+      }
+   }
 }#end describe

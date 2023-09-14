@@ -52,7 +52,7 @@ Function Get-ChildItemEnhanced {
 
 #>
    [CmdletBinding(DefaultParameterSetName = 'Items', HelpUri = 'https://go.microsoft.com/fwlink/?LinkID=2096492')]
-   [Alias('GCE')]
+   [Alias('gce')]
    Param(
 
       [Parameter(ParameterSetName = 'Items', Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]

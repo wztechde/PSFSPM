@@ -26,6 +26,7 @@ Describe 'Get-ChilditemEnhanced' -Tag Integration {
          $null = New-Item -Path "$TestDrive\Folder1\Folder11" -Name 'F11_SF2' -ItemType Directory -Force
          $null = New-Item -Path "$TestDrive\Folder2" -Name 'F2_SF1' -ItemType Directory -Force
          $null = New-Item -Path "$TestDrive\Folder2" -Name 'F2_SF2' -ItemType Directory -Force
+         $null = New-Item -Path "$TestDrive\Folder2\F2_SF2" -Name 'Test.txt' -ItemType File -Force
       }
       It 'Should automatically add recurse, when -StartDepth given' -Tag Unit {
          $Result = Get-ChildItemEnhanced -Path $TestDrive -StartDepth 2
@@ -45,11 +46,12 @@ Describe 'Get-ChilditemEnhanced' -Tag Integration {
          $Result.Name | Should -Contain 'F2_SF2'
          $Result.Name.Count | Should -Be 4
       }
-      It 'Should contain the hierarchy 3 folders' {
-         $Result = Get-ChildItemEnhanced -Path $TestDrive -StartDepth 3
+      It 'Should contain the hierarchy 3 folders and files' {
+         $Result = Get-ChildItemEnhanced -Path $TestDrive -MinimumDepth 3
          $Result[0].Name | Should -Be 'F11_SF1'
          $Result[1].Name | Should -Be 'F11_SF2'
-         $Result.Name.Count | Should -Be 2
+         $Result[2].Name | Should -Be 'Test.txt'
+         $Result.Name.Count | Should -Be 3
       }
    }
 }

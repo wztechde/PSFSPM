@@ -59,12 +59,12 @@ Describe 'FMPermission' -Tag Unit {
             $rs1.Inherit | Should -Be $Inherit
          }
       }#end context
-      Context "method: 'GetFileSystemAccessRule'" {
+      Context "method: 'Get_FileSystemAccessRule'" {
          BeforeAll {
             $result = New-FMPermission -Identity 'test' -FileRight 'Read' -Inheritance 'ThisFolderOnly'
          }
          It 'Should return a FileSystemAccessRule object' {
-            $result.GetFileSystemAccessRule() | Should -BeOfType 'System.Security.AccessControl.FileSystemAccessRule'
+            $result.Get_FileSystemAccessRule() | Should -BeOfType 'System.Security.AccessControl.FileSystemAccessRule'
          }#end it
          It "Object members should have correct values set for different inheritances - current <Inheritance>" -ForEach @(
             @{Inheritance = 'ThisFolderSubfoldersAndFiles'; Propagate = 'None'; Inherit = 'ContainerInherit, ObjectInherit' },
@@ -77,7 +77,7 @@ Describe 'FMPermission' -Tag Unit {
             @{Inheritance = 'File'; Propagate = 'None'; Inherit = 'None' }
          ) {
             $result = New-FMPermission -Identity 'test' -FileRight 'Read' -Inheritance $Inheritance
-            $rs1 = $result.GetFileSystemAccessRule()
+            $rs1 = $result.Get_FileSystemAccessRule()
             $($rs1.PropagationFlags) | Should -Be $Propagate
             $($rs1.InheritanceFlags) | Should -Be $Inherit
          }
